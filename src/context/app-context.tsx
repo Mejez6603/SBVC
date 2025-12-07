@@ -6,7 +6,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export type Passage = {
   reference: string;
   text: string;
-};
+} | null;
 
 interface AppContextType {
   theme: 'dark' | 'light';
@@ -37,14 +37,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const storedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
     const initialTheme = storedTheme || 'dark';
     setTheme(initialTheme);
-    document.documentElement.classList.add(initialTheme);
+    if (typeof window !== 'undefined') {
+      document.documentElement.className = '';
+      document.documentElement.classList.add(initialTheme);
+    }
   }, []);
 
   const toggleTheme = () => {
     setTheme(prevTheme => {
       const newTheme = prevTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.classList.remove('dark', 'light');
-      document.documentElement.classList.add(newTheme);
+      if (typeof window !== 'undefined') {
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(newTheme);
+      }
       localStorage.setItem('sbvc-theme', newTheme);
       return newTheme;
     });

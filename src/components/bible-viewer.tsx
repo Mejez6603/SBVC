@@ -100,7 +100,7 @@ export function BibleViewer() {
               <Card className="h-full w-full shadow-lg border-none bg-transparent">
                 <CardHeader>
                   <CardTitle className="font-headline text-3xl md:text-4xl text-center text-primary/90">
-                    {passage.reference}
+                    {passage?.reference}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="mt-4">
@@ -108,7 +108,7 @@ export function BibleViewer() {
                     className="leading-relaxed md:leading-loose transition-all duration-300 ease-in-out text-center"
                     style={{ fontSize: `${textSize}px` }}
                   >
-                    {passage.text}
+                    {passage?.text}
                   </p>
                 </CardContent>
               </Card>
