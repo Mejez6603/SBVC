@@ -1,5 +1,3 @@
-# Firebase Studio
+# VerseView
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+This is a Next.js application designed to provide a clean and distraction-free way to read Bible passages.
