@@ -69,14 +69,14 @@ function Controller() {
                 Tagalog
               </div>
             </div>
-            <div className="flex-1 grid grid-cols-2">
-              <div className="flex flex-col">
+            <div className="flex-1 grid grid-cols-2 overflow-hidden">
+              <div className="flex flex-col border-r">
                 <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
-                <div className="flex-1 overflow-auto">
+                <ScrollArea className="flex-1">
                   <SBVC version="KJV" />
-                </div>
+                </ScrollArea>
               </div>
-              <div className="flex flex-col border-l">
+              <div className="flex flex-col">
                 <div className="p-2 text-center font-semibold text-xs border-b">
                   <div className="flex justify-center gap-2">
                       <Button 
@@ -97,9 +97,9 @@ function Controller() {
                       </Button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto">
+                <ScrollArea className="flex-1">
                   <SBVC version={selectedTagalogVersion} />
-                </div>
+                </ScrollArea>
               </div>
             </div>
           </div>
