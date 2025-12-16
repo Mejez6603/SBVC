@@ -6,6 +6,7 @@ import { SBVC } from '@/components/sbvc';
 import { PresentationController } from '@/components/presentation-controller';
 import { Notepad } from '@/components/notepad';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 
 export default function ControllerPage() {
   return (
@@ -31,19 +32,19 @@ export default function ControllerPage() {
               </Tabs>
             </div>
             <ChapterList />
-            <div className="flex-1 border-r">
-              <Tabs defaultValue="KJV" className="flex flex-col h-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="KJV">KJV</TabsTrigger>
-                  <TabsTrigger value="TL">TL</TabsTrigger>
-                </TabsList>
-                <TabsContent value="KJV" className="flex-1 overflow-auto">
+            <div className="flex-1 border-r grid grid-cols-2">
+              <div className="flex flex-col">
+                <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
+                <div className="flex-1 overflow-auto">
                   <SBVC version="KJV" />
-                </TabsContent>
-                <TabsContent value="TL" className="flex-1 overflow-auto">
+                </div>
+              </div>
+              <div className="flex flex-col border-l">
+                <div className="p-2 text-center font-semibold text-xs border-b">TL</div>
+                <div className="flex-1 overflow-auto">
                   <SBVC version="TL" />
-                </TabsContent>
-              </Tabs>
+                </div>
+              </div>
             </div>
           </div>
           <div className="w-[350px] border-l flex flex-col">
