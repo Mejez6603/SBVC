@@ -98,6 +98,27 @@ export function SBVC({ version }: SBVCProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Diagnostic function to check API key and available Bibles
+    const checkApiKey = async () => {
+      console.log('Running API Key Diagnostic...');
+      try {
+        const response = await fetch(API_URL, {
+          headers: { 'api-key': API_KEY }
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          console.error('API Key Diagnostic FAILED:', data);
+        } else {
+          console.log('API Key Diagnostic SUCCESS. Available Bibles:', data.data);
+        }
+      } catch (e) {
+        console.error('API Key Diagnostic FAILED with error:', e);
+      }
+    };
+    checkApiKey();
+  }, []);
+
+  useEffect(() => {
     const loadChapter = async () => {
       if (!selectedBook || !selectedChapter) return;
 
@@ -106,9 +127,6 @@ export function SBVC({ version }: SBVCProps) {
       setVerses([]);
 
       try {
-        if (!API_KEY) {
-          throw new Error("The Bible API key is missing. Please get a free key from api.bible and add it to a .env file as NEXT_PUBLIC_BIBLE_API_KEY.");
-        }
         const fetchedVerses = await fetchChapterFromApi(selectedBook, selectedChapter, version);
         if (fetchedVerses.length === 0) {
           setError('Could not load chapter. The book may not be available in this translation or the API key is invalid/missing.');
