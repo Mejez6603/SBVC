@@ -50,7 +50,7 @@ async function fetchChapterFromApi(book: string, chapter: number, version: 'KJV'
   
   if (!API_KEY) {
     console.error("API key for api.bible is not configured.");
-    throw new Error("API key is missing. Please add NEXT_PUBLIC_BIBLE_API_KEY to your .env.local file.");
+    throw new Error("API key is missing. Please add NEXT_PUBLIC_BIBLE_API_KEY to your .env file.");
   }
   
   const passageId = `${bookId}.${chapter}`;
@@ -110,14 +110,14 @@ export function SBVC({ version }: SBVCProps) {
         }
         const fetchedVerses = await fetchChapterFromApi(selectedBook, selectedChapter, version);
         if (fetchedVerses.length === 0) {
-          setError('Could not load chapter. The book may not be available in this translation or the API key is invalid.');
+          setError('Could not load chapter. The book may not be available in this translation or the API key is invalid/missing.');
         }
         setVerses(fetchedVerses);
       } catch (e: any) {
         if (e.message.includes('API key')) {
-             setError("The Bible API key is missing. Please get a free key from api.bible and add it to a .env.local file as NEXT_PUBLIC_BIBLE_API_KEY.");
+             setError("The Bible API key is missing. Please get a free key from api.bible and add it to a .env file as NEXT_PUBLIC_BIBLE_API_KEY.");
         } else {
-            setError('An error occurred while fetching data.');
+            setError(`An error occurred while fetching data: ${e.message}`);
         }
         console.error(e);
       } finally {
