@@ -44,15 +44,15 @@ export default function ControllerPage() {
                   </div>
                 </div>
                 <div className="flex flex-col border-l">
-                  <div className="p-2 text-center font-semibold text-xs border-b">Ang Bibliya 1905</div>
+                  <div className="p-2 text-center font-semibold text-xs border-b">ADB1905</div>
                   <div className="flex-1 overflow-auto">
-                    <SBVC version="TL" />
+                    <SBVC version="ADB" />
                   </div>
                 </div>
                 <div className="flex flex-col border-l">
-                  <div className="p-2 text-center font-semibold text-xs border-b">TCN2015</div>
+                  <div className="p-2 text-center font-semibold text-xs border-b">TCB2015</div>
                   <div className="flex-1 overflow-auto">
-                    <SBVC version="TCN" />
+                    <SBVC version="TCB" />
                   </div>
                 </div>
               </div>

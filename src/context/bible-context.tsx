@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Passage, useAppContext } from './app-context';
 import { bibleVersions } from '@/lib/bible';
 
-type BibleVersion = 'KJV' | 'TL' | 'TCN';
+type BibleVersion = 'KJV' | 'ADB' | 'TCB';
 
 interface BibleContextType {
   selectedBook: string;

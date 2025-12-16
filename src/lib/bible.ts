@@ -1,6 +1,6 @@
 import kjv from './kjv.json';
-import tlv from './tlv.json';
-import tcn from './tcn2015.json';
+import adb from './adb1905.json';
+import tcb from './tcb2015.json';
 
 type BibleData = {
   [book: string]: {
@@ -11,13 +11,13 @@ type BibleData = {
 };
 
 const kjvData = kjv as BibleData;
-const tlvData = tlv as BibleData;
-const tcnData = tcn as BibleData;
+const adbData = adb as BibleData;
+const tcbData = tcb as BibleData;
 
 export const bibleVersions: { [key: string]: BibleData } = {
   KJV: kjvData,
-  TL: tlvData,
-  TCN: tcnData,
+  ADB: adbData,
+  TCB: tcbData,
 };
 
 export const oldTestamentBooks = [
