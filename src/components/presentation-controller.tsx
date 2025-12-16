@@ -19,6 +19,15 @@ export function PresentationController() {
       console.error("Could not open presentation window:", error);
     }
   };
+  
+  const handleClearScreen = () => {
+    setPassage(null);
+    try {
+      localStorage.removeItem('present-passage');
+    } catch (error) {
+      console.error("Could not clear passage from local storage:", error);
+    }
+  }
 
   return (
     <div className="p-4 border-b">
@@ -42,7 +51,7 @@ export function PresentationController() {
         <Button variant="outline" size="icon" onClick={handleShowScreen}>
           <Play />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => setPassage(null)}>
+        <Button variant="outline" size="icon" onClick={handleClearScreen}>
           <X />
         </Button>
         <Button variant="outline" size="icon" disabled>

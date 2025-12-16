@@ -10,22 +10,38 @@ export default function PresentPage() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
-    const handleStorageChange = () => {
-        try {
-            const savedPassage = localStorage.getItem('present-passage');
-            if (savedPassage) {
-                setPassage(JSON.parse(savedPassage));
+    const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'present-passage') {
+            try {
+                const savedPassage = localStorage.getItem('present-passage');
+                if (savedPassage) {
+                    setPassage(JSON.parse(savedPassage));
+                }
+            } catch (error) {
+                console.error("Failed to parse passage from local storage:", error);
             }
+        }
+        if (e.key === 'sbvc-theme') {
             const savedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
             if (savedTheme) {
                 setTheme(savedTheme);
             }
-        } catch (error) {
-            console.error("Failed to load data from local storage:", error);
         }
     };
     
-    handleStorageChange(); // Initial load
+    // Initial load
+    try {
+        const savedPassage = localStorage.getItem('present-passage');
+        if (savedPassage) {
+            setPassage(JSON.parse(savedPassage));
+        }
+        const savedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
+        if (savedTheme) {
+            setTheme(savedTheme);
+        }
+    } catch (error) {
+        console.error("Failed to load data from local storage:", error);
+    }
 
     window.addEventListener('storage', handleStorageChange);
     return () => {

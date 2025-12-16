@@ -22,20 +22,35 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const { setPassage } = useAppContext();
 
   useEffect(() => {
-    if (selectedVerse) {
-        const kjvText = bibleVersions['KJV']?.[selectedBook]?.[selectedChapter]?.[selectedVerse] || '';
-        const tlvText = bibleVersions['TL']?.[selectedBook]?.[selectedChapter]?.[selectedVerse] || '';
-        const verseText = `${kjvText}\n\n${tlvText}`;
+    if (selectedVerse !== null) {
+      const kjvText =
+        bibleVersions['KJV']?.[selectedBook]?.[selectedChapter]?.[
+          selectedVerse
+        ] || '';
+      const tlvText =
+        bibleVersions['TL']?.[selectedBook]?.[selectedChapter]?.[
+          selectedVerse
+        ] || '';
+      const verseText = `${kjvText}\n\n${tlvText}`;
 
-        const newPassage = {
-            reference: `${selectedBook} ${selectedChapter}:${selectedVerse}`,
-            text: verseText
-        };
-        setPassage(newPassage);
-        try {
-            localStorage.setItem('present-passage', JSON.stringify(newPassage));
+      const newPassage: Passage = {
+        reference: `${selectedBook} ${selectedChapter}:${selectedVerse}`,
+        text: verseText,
+      };
+
+      setPassage(newPassage);
+      try {
+        // This will trigger the 'storage' event in the presentation window
+        localStorage.setItem('present-passage', JSON.stringify(newPassage));
+      } catch (error) {
+        console.error('Could not save passage to local storage:', error);
+      }
+    } else {
+        setPassage(null);
+         try {
+            localStorage.removeItem('present-passage');
         } catch (error) {
-            console.error("Could not save passage to local storage:", error);
+            console.error('Could not remove passage from local storage:', error);
         }
     }
   }, [selectedVerse, selectedBook, selectedChapter, setPassage]);
@@ -49,8 +64,8 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     },
     selectedChapter,
     setSelectedChapter: (chapter: number) => {
-        setSelectedChapter(chapter);
-        setSelectedVerse(null);
+      setSelectedChapter(chapter);
+      setSelectedVerse(null);
     },
     selectedVerse,
     setSelectedVerse,
