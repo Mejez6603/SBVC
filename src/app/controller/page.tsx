@@ -18,21 +18,12 @@ function Controller() {
   const { selectedTagalogVersion, setSelectedTagalogVersion } = useBible();
 
   const handleFullscreenRequest = () => {
-    // This will open the window if it's not already open, and focus it if it is.
-    const presentWindow = window.open('/present', 'present', 'noopener,noreferrer');
-    if (presentWindow) {
-      presentWindow.focus();
-    }
-    // A brief delay can sometimes help ensure the window is focused before the event is sent.
-    setTimeout(() => {
-        localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
-    }, 100);
+    localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
   };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'f' && !e.metaKey && !e.ctrlKey) {
-        // Check if the event target is not an input field
         const target = e.target as HTMLElement;
         if (target.tagName.toLowerCase() !== 'input' && target.tagName.toLowerCase() !== 'textarea') {
             e.preventDefault();

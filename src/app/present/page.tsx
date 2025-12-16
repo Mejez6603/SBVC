@@ -31,26 +31,26 @@ export default function PresentPage() {
     }
   };
 
-  const syncStateFromStorage = (key: string | null) => {
-    try {
-      if (key === null || key === THEME_KEY) {
-        const savedTheme = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
-        setTheme(savedTheme || 'dark');
-      }
-      
-      if (key === null || key === PASSAGE_KEY) {
-        const savedPassage = localStorage.getItem(PASSAGE_KEY);
-        setPassage(savedPassage ? JSON.parse(savedPassage) : null);
-      }
-    } catch (error) {
-      console.error("Failed to parse from local storage:", error);
-      if (key === null || key === PASSAGE_KEY) {
-        setPassage(null);
-      }
-    }
-  };
-
   useEffect(() => {
+    const syncStateFromStorage = (key: string | null) => {
+      try {
+        if (key === null || key === THEME_KEY) {
+          const savedTheme = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
+          setTheme(savedTheme || 'dark');
+        }
+        
+        if (key === null || key === PASSAGE_KEY) {
+          const savedPassage = localStorage.getItem(PASSAGE_KEY);
+          setPassage(savedPassage ? JSON.parse(savedPassage) : null);
+        }
+      } catch (error) {
+        console.error("Failed to parse from local storage:", error);
+        if (key === null || key === PASSAGE_KEY) {
+          setPassage(null);
+        }
+      }
+    };
+    
     // Set unique name for the presentation window
     window.name = 'present';
     
@@ -65,7 +65,7 @@ export default function PresentPage() {
     };
     
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key.toLowerCase() === 'f') {
+        if (e.key.toLowerCase() === 'f' && !e.metaKey && !e.ctrlKey) {
             e.preventDefault();
             toggleFullscreen();
         }
