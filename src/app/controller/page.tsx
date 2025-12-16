@@ -12,32 +12,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 
-const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
-
-
 function Controller() {
   const { selectedTagalogVersion, setSelectedTagalogVersion } = useBible();
   
-  const handleFullscreen = () => {
-    try {
-      localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
-    } catch (error) {
-      console.error('Could not access local storage:', error);
-    }
-  };
-  
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === 'f') {
-        handleFullscreen();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
   return (
     <div className="h-screen w-full flex flex-col font-sans text-sm">
       <header className="h-10 border-b flex items-center px-4 text-xs text-muted-foreground">

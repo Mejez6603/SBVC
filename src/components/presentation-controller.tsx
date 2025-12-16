@@ -7,8 +7,6 @@ import { Card, CardContent } from './ui/card';
 import { Moon, Play, Sun, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
-
 export function PresentationController() {
   const { passage, setPassage, theme, toggleTheme } = useAppContext();
 
@@ -34,14 +32,6 @@ export function PresentationController() {
     }
   }
 
-  const handleFullscreen = () => {
-    try {
-      localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
-    } catch (error) {
-      console.error('Could not access local storage:', error);
-    }
-  };
-
   return (
     <div className="p-4 border-b">
       <AnimatePresence>
@@ -60,15 +50,12 @@ export function PresentationController() {
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="grid grid-cols-5 gap-2 mt-4">
+      <div className="grid grid-cols-4 gap-2 mt-4">
         <Button variant="outline" size="icon" onClick={handleShowScreen}>
           <Play />
         </Button>
         <Button variant="outline" size="icon" onClick={handleClearScreen}>
           <X />
-        </Button>
-        <Button variant="outline" size="icon" onClick={handleFullscreen}>
-          F
         </Button>
         <Button variant="outline" size="icon" onClick={toggleTheme}>
             {theme === 'dark' ? <Sun/> : <Moon />}
