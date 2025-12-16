@@ -11,6 +11,7 @@ const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
 export function PresentationController() {
   const { passage, setPassage, theme, toggleTheme } = useAppContext();
+  let presentWindow: Window | null = null;
 
   const handleShowScreen = () => {
     try {
@@ -19,7 +20,7 @@ export function PresentationController() {
         } else {
             localStorage.removeItem('present-passage');
         }
-      window.open('/present', '_blank', 'noopener,noreferrer');
+      presentWindow = window.open('/present', '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error("Could not open presentation window:", error);
     }
@@ -36,7 +37,9 @@ export function PresentationController() {
 
   const handleFullscreen = () => {
     try {
-      // Set a value in localStorage to signal the presentation window
+      if (presentWindow) {
+        presentWindow.focus();
+      }
       localStorage.setItem(FULLSCREEN_KEY, String(new Date().getTime()));
     } catch (error) {
       console.error('Could not access local storage:', error);

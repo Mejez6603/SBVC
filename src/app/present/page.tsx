@@ -13,21 +13,31 @@ export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  const toggleFullscreen = async () => {
+  const enterFullscreen = async () => {
     if (!document.fullscreenElement) {
       try {
         await document.documentElement.requestFullscreen();
       } catch (err) {
         console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
       }
-    } else {
-      if (document.exitFullscreen) {
-        try {
-          await document.exitFullscreen();
-        } catch (err) {
-          console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
-        }
+    }
+  };
+
+  const exitFullscreen = async () => {
+    if (document.fullscreenElement) {
+      try {
+        await document.exitFullscreen();
+      } catch (err) {
+        console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
       }
+    }
+  };
+  
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      enterFullscreen();
+    } else {
+      exitFullscreen();
     }
   };
 
@@ -52,7 +62,7 @@ export default function PresentPage() {
         syncStateFromStorage();
       }
       if (e.key === FULLSCREEN_KEY) {
-        toggleFullscreen();
+        enterFullscreen();
       }
     };
     
