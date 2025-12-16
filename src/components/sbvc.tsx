@@ -17,7 +17,7 @@ type Verse = {
 };
 
 const API_URL = 'https://api.scripture.api.bible/v1/bibles';
-const API_KEY = 'nhFVKnTausxskioYM6ucy';
+const API_KEY = 'NhCCrgvPK7r1ac_XIs230';
 
 const BIBLE_IDS = {
     KJV: 'de4e12af7f28f599-01', // KJV
