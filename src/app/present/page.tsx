@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,10 +7,29 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 const THEME_KEY = 'sbvc-theme';
 const PASSAGE_KEY = 'present-passage';
+const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
 export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  const toggleFullscreen = async () => {
+    if (!document.fullscreenElement) {
+      try {
+        await document.documentElement.requestFullscreen();
+      } catch (err) {
+        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+      }
+    } else {
+      if (document.exitFullscreen) {
+        try {
+          await document.exitFullscreen();
+        } catch (err) {
+          console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+        }
+      }
+    }
+  };
 
   const syncStateFromStorage = () => {
     try {
@@ -31,12 +51,23 @@ export default function PresentPage() {
       if (e.key === PASSAGE_KEY || e.key === THEME_KEY) {
         syncStateFromStorage();
       }
+      if (e.key === FULLSCREEN_KEY) {
+        toggleFullscreen();
+      }
     };
     
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key.toLowerCase() === 'f') {
+            toggleFullscreen();
+        }
+    }
+
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
         window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
