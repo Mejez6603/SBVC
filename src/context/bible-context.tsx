@@ -15,6 +15,8 @@ interface BibleContextType {
   selectedVerse: number | null;
   setSelectedVerse: (verse: number | null, version: BibleVersion) => void;
   selectedVersion: BibleVersion;
+  selectedTagalogVersion: 'ADB' | 'TCB';
+  setSelectedTagalogVersion: (version: 'ADB' | 'TCB') => void;
 }
 
 const BibleContext = createContext<BibleContextType | undefined>(undefined);
@@ -24,6 +26,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [selectedVerse, setInternalSelectedVerse] = useState<number | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<BibleVersion>('KJV');
+  const [selectedTagalogVersion, setSelectedTagalogVersion] = useState<'ADB' | 'TCB'>('ADB');
   const { setPassage } = useAppContext();
 
   useEffect(() => {
@@ -75,7 +78,9 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     },
     selectedVerse,
     setSelectedVerse,
-    selectedVersion
+    selectedVersion,
+    selectedTagalogVersion,
+    setSelectedTagalogVersion
   };
 
   return <BibleContext.Provider value={value}>{children}</BibleContext.Provider>;
