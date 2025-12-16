@@ -72,9 +72,9 @@ function Controller() {
             <div className="flex-1 grid grid-cols-2 overflow-hidden">
               <div className="flex flex-col border-r">
                 <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
-                <ScrollArea className="flex-1">
+                <div className="flex-1 overflow-auto">
                   <SBVC version="KJV" />
-                </ScrollArea>
+                </div>
               </div>
               <div className="flex flex-col">
                 <div className="p-2 text-center font-semibold text-xs border-b">
@@ -97,9 +97,9 @@ function Controller() {
                       </Button>
                   </div>
                 </div>
-                <ScrollArea className="flex-1">
+                <div className="flex-1 overflow-auto">
                   <SBVC version={selectedTagalogVersion} />
-                </ScrollArea>
+                </div>
               </div>
             </div>
           </div>
