@@ -62,7 +62,7 @@ function Controller() {
             </div>
           </div>
           <ChapterList />
-          <div className="flex-1 border-r flex flex-col">
+          <div className="flex-1 border-r flex flex-col min-h-0">
             <div className="grid grid-cols-2 border-b">
               <div className="p-2 text-center font-bold text-xs">English</div>
               <div className="p-2 text-center font-bold text-xs border-l">
