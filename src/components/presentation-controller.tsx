@@ -37,9 +37,6 @@ export function PresentationController() {
 
   const handleFullscreen = () => {
     try {
-      if (presentWindow) {
-        presentWindow.focus();
-      }
       localStorage.setItem(FULLSCREEN_KEY, String(new Date().getTime()));
     } catch (error) {
       console.error('Could not access local storage:', error);
