@@ -6,6 +6,8 @@ import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
+import * as adbData from '@/lib/adb1905.json';
+import * as tcbData from '@/lib/tcb2015.json';
 
 interface SBVCProps {
   version: 'KJV' | 'ADB' | 'TCB';
@@ -16,33 +18,47 @@ type Verse = {
     text: string;
 }
 
+type BibleData = {
+    [book: string]: {
+        [chapter: string]: {
+            [verse: string]: string;
+        };
+    };
+};
+
+const bibleData: {[key: string]: BibleData} = {
+    ADB: adbData as BibleData,
+    TCB: tcbData as BibleData,
+}
+
 const API_URL = 'https://bible-api.com';
 
-async function fetchChapter(book: string, chapter: number, version: string): Promise<Verse[]> {
-    // The public API uses 'kjv'. The app uses 'KJV'.
-    const apiVersion = version.toLowerCase();
-    
-    // For now, only KJV is supported by the public API
-    if (apiVersion !== 'kjv') {
-        // Here you could add logic to fetch from your own data source for ADB and TCB
-        console.warn(`${version} is not supported by the public API. Returning empty.`);
-        return [];
-    }
-    
+async function fetchKJVChapter(book: string, chapter: number): Promise<Verse[]> {
     try {
-        const response = await fetch(`${API_URL}/${book}+${chapter}?translation=${apiVersion}`);
+        const response = await fetch(`${API_URL}/${book}+${chapter}?translation=kjv`);
         if (!response.ok) {
             throw new Error(`API call failed with status: ${response.status}`);
         }
         const data = await response.json();
         return data.verses.map((v: any) => ({
             verse: v.verse,
-            text: v.text.replace(/\n/g, ' ').trim(), // Clean up verse text
+            text: v.text.replace(/\n/g, ' ').trim(),
         }));
     } catch (error) {
-        console.error('Failed to fetch chapter:', error);
+        console.error('Failed to fetch KJV chapter:', error);
         return [];
     }
+}
+
+function fetchLocalChapter(book: string, chapter: number, version: 'ADB' | 'TCB'): Verse[] {
+    const data = bibleData[version];
+    if (data && data[book] && data[book][chapter]) {
+        return Object.entries(data[book][chapter]).map(([verseNum, text]) => ({
+            verse: parseInt(verseNum, 10),
+            text: text,
+        }));
+    }
+    return [];
 }
 
 
@@ -61,11 +77,19 @@ export function SBVC({ version }: SBVCProps) {
         setVerses([]);
 
         try {
-            const fetchedVerses = await fetchChapter(selectedBook, selectedChapter, version);
-            setVerses(fetchedVerses);
-            if (fetchedVerses.length === 0 && version === 'KJV') {
-              setError('Could not load chapter. Please try a different book or chapter.');
+            let fetchedVerses: Verse[] = [];
+            if (version === 'KJV') {
+                fetchedVerses = await fetchKJVChapter(selectedBook, selectedChapter);
+                 if (fetchedVerses.length === 0) {
+                    setError('Could not load chapter. Please try a different book or chapter.');
+                }
+            } else {
+                fetchedVerses = fetchLocalChapter(selectedBook, selectedChapter, version);
+                if (fetchedVerses.length === 0) {
+                    setError(`Data for ${version} is not available in local files. Please populate the corresponding JSON file.`);
+                }
             }
+            setVerses(fetchedVerses);
         } catch (e) {
             setError('An error occurred while fetching data.');
         } finally {
@@ -107,7 +131,7 @@ export function SBVC({ version }: SBVCProps) {
             <span className="w-6 font-bold opacity-50">{verse}</span>
             <span className={cn('flex-1', selectedVerse === verse && selectedVersion === version ? 'font-semibold' : '')}>{text}</span>
           </button>
-        )) : <p className="text-muted-foreground text-center">Select a book and chapter to view, or data for this version is unavailable.</p>}
+        )) : <p className="text-muted-foreground text-center">Select a book and chapter to view.</p>}
       </div>
     </ScrollArea>
   );
