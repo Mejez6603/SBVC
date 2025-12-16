@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
-      <h1 className="text-4xl font-bold text-primary/90 mb-4">VerseView</h1>
+      <h1 className="text-4xl font-bold text-primary/90 mb-4">SBVC</h1>
       <p className="text-xl text-muted-foreground mb-8">Your Bible Presentation Assistant</p>
       <Button onClick={openControlPanel} size="lg">
         Open Control Panel

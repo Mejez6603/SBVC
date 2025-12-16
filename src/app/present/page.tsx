@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -84,7 +83,7 @@ export default function PresentPage() {
             exit={{ opacity: 0 }}
             className="text-center"
           >
-            <h1 className="text-4xl font-bold text-primary/90">VerseView</h1>
+            <h1 className="text-4xl font-bold text-primary/90">SBVC</h1>
             <p className="mt-4 text-xl text-foreground/80">No passage selected for presentation.</p>
           </motion.div>
         )}

@@ -4,7 +4,7 @@ import { AppProvider } from '@/context/app-context';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'VerseView',
+  title: 'SBVC',
   description: 'A clean and distraction-free way to read Bible passages.',
 };
 
