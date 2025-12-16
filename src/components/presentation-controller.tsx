@@ -19,7 +19,7 @@ export function PresentationController() {
         } else {
             localStorage.removeItem('present-passage');
         }
-      window.open('/present', 'present', 'noopener,noreferrer');
+      window.open('/present', 'present');
     } catch (error) {
       console.error("Could not open presentation window:", error);
     }
@@ -35,8 +35,6 @@ export function PresentationController() {
   }
 
   const handleFullscreenRequest = () => {
-    // This ensures the presentation window is focused before the event is sent.
-    window.open('/present', 'present');
     localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
   };
 

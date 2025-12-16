@@ -18,8 +18,6 @@ function Controller() {
   const { selectedTagalogVersion, setSelectedTagalogVersion } = useBible();
 
   const handleFullscreenRequest = () => {
-    // This ensures the presentation window is focused before the event is sent.
-    window.open('/present', 'present');
     localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
   };
 
