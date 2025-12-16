@@ -37,18 +37,19 @@ export function VerseView({ version }: VerseViewProps) {
     <ScrollArea className="h-full">
       <div className="p-4 text-sm leading-relaxed">
         {verses.length > 0 ? verses.map(({verse, text}) => (
-          <p key={verse} className="mb-2">
-            <button
-              onClick={() => setSelectedVerse(verse)}
-              className={cn(
-                'mr-2 font-bold p-1 rounded-sm',
-                selectedVerse === verse ? 'bg-blue-600 text-white' : ''
-              )}
-            >
-              {verse}
-            </button>
-            <span className={cn(selectedVerse === verse ? 'font-bold' : '')}>{text}</span>
-          </p>
+          <button
+            key={verse}
+            onClick={() => setSelectedVerse(verse)}
+            className={cn(
+              'flex items-start gap-2 text-left w-full p-2 rounded-md',
+              selectedVerse === verse
+                ? 'bg-blue-600 text-white'
+                : 'hover:bg-accent'
+            )}
+          >
+            <span className="w-6 font-bold opacity-50">{verse}</span>
+            <span className={cn('flex-1', selectedVerse === verse ? 'font-semibold' : '')}>{text}</span>
+          </button>
         )) : <p>Select a book and chapter to view.</p>}
       </div>
     </ScrollArea>
