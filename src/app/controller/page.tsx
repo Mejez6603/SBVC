@@ -63,44 +63,40 @@ function Controller() {
           </div>
           <ChapterList />
           <div className="flex-1 border-r flex flex-col min-h-0">
-            <div className="grid grid-cols-2 border-b">
-              <div className="p-2 text-center font-bold text-xs">English</div>
-              <div className="p-2 text-center font-bold text-xs border-l">
-                Tagalog
-              </div>
-            </div>
             <div className="flex flex-1 min-h-0">
-              <div className="flex-1 flex flex-col border-r h-full">
-                <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
-                <div className="flex-1 overflow-hidden">
-                  <SBVC version="KJV" />
+                <div className="flex-1 flex flex-col border-r h-full">
+                    <div className="p-2 text-center font-bold text-xs border-b">English</div>
+                    <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
+                    <div className="flex-1 overflow-hidden">
+                        <SBVC version="KJV" />
+                    </div>
                 </div>
-              </div>
-              <div className="flex-1 flex flex-col h-full">
-                <div className="p-2 text-center font-semibold text-xs border-b">
-                  <div className="flex justify-center gap-2">
-                      <Button 
-                        variant={selectedTagalogVersion === 'ADB' ? 'default' : 'ghost'}
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => setSelectedTagalogVersion('ADB')}
-                      >
-                        ADB1905
-                      </Button>
-                      <Button 
-                        variant={selectedTagalogVersion === 'TCB' ? 'default' : 'ghost'}
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => setSelectedTagalogVersion('TCB')}
-                      >
-                        TCB2015
-                      </Button>
-                  </div>
+                <div className="flex-1 flex flex-col h-full">
+                    <div className="p-2 text-center font-bold text-xs border-b">Tagalog</div>
+                    <div className="p-2 text-center font-semibold text-xs border-b">
+                        <div className="flex justify-center gap-2">
+                            <Button 
+                                variant={selectedTagalogVersion === 'ADB' ? 'default' : 'ghost'}
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                onClick={() => setSelectedTagalogVersion('ADB')}
+                            >
+                                ADB1905
+                            </Button>
+                            <Button 
+                                variant={selectedTagalogVersion === 'TCB' ? 'default' : 'ghost'}
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                onClick={() => setSelectedTagalogVersion('TCB')}
+                            >
+                                TCB2015
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        <SBVC version={selectedTagalogVersion} />
+                    </div>
                 </div>
-                <div className="flex-1 overflow-hidden">
-                  <SBVC version={selectedTagalogVersion} />
-                </div>
-              </div>
             </div>
           </div>
         </div>
