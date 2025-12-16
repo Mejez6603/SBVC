@@ -1,18 +1,3 @@
-
-type BibleData = {
-  [book: string]: {
-    [chapter: string]: {
-      [verse: string]: string;
-    };
-  };
-};
-
-export const bibleVersions: { [key: string]: BibleData } = {
-  KJV: {},
-  ADB: {},
-  TCB: {},
-};
-
 export const oldTestamentBooks = [
   "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", 
   "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", 

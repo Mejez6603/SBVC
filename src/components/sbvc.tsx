@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useBible } from '@/context/bible-context';
@@ -6,59 +5,88 @@ import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
-import * as adbData from '@/lib/adb1905.json';
-import * as tcbData from '@/lib/tcb2015.json';
 
 interface SBVCProps {
   version: 'KJV' | 'ADB' | 'TCB';
 }
 
 type Verse = {
-    verse: number;
-    text: string;
-}
-
-type BibleData = {
-    [book: string]: {
-        [chapter: string]: {
-            [verse: string]: string;
-        };
-    };
+  verse: number;
+  text: string;
 };
 
-const bibleData: {[key: string]: BibleData} = {
-    ADB: adbData as BibleData,
-    TCB: tcbData as BibleData,
-}
+const API_URL = 'https://api.scripture.api.bible/v1/bibles';
+const API_KEY = process.env.NEXT_PUBLIC_BIBLE_API_KEY;
 
-const API_URL = 'https://bible-api.com';
+const BIBLE_IDS = {
+    KJV: 'de4e12af7f28f599-01', // KJV
+    ADB: '068596979b4a2ff4-01', // Ang Dating Biblia (1905)
+    TCB: 'f93fc3a31c5379e4-01', // Tagalog Contemporary Bible
+};
 
-async function fetchKJVChapter(book: string, chapter: number): Promise<Verse[]> {
-    try {
-        const response = await fetch(`${API_URL}/${book}+${chapter}?translation=kjv`);
-        if (!response.ok) {
-            throw new Error(`API call failed with status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data.verses.map((v: any) => ({
-            verse: v.verse,
-            text: v.text.replace(/\n/g, ' ').trim(),
-        }));
-    } catch (error) {
-        console.error('Failed to fetch KJV chapter:', error);
-        return [];
-    }
-}
+// We need to map book names to the IDs that api.bible uses.
+// This is not exhaustive and can be expanded.
+const BOOK_IDS: { [key: string]: string } = {
+    "Genesis": "GEN", "Exodus": "EXO", "Leviticus": "LEV", "Numbers": "NUM", "Deuteronomy": "DEU", "Joshua": "JOS", "Judges": "JDG", "Ruth": "RUT",
+    "1 Samuel": "1SA", "2 Samuel": "2SA", "1 Kings": "1KI", "2 Kings": "2KI", "1 Chronicles": "1CH", "2 Chronicles": "2CH", "Ezra": "EZR",
+    "Nehemiah": "NEH", "Esther": "EST", "Job": "JOB", "Psalms": "PSA", "Proverbs": "PRO", "Ecclesiastes": "ECC", "Song of Solomon": "SNG",
+    "Isaiah": "ISA", "Jeremiah": "JER", "Lamentations": "LAM", "Ezekiel": "EZK", "Daniel": "DAN", "Hosea": "HOS", "Joel": "JOL", "Amos": "AMO",
+    "Obadiah": "OBA", "Jonah": "JON", "Micah": "MIC", "Nahum": "NAH", "Habakkuk": "HAB", "Zephaniah": "ZEP", "Haggai": "HAG", "Zechariah": "ZEC", "Malachi": "MAL",
+    "Matthew": "MAT", "Mark": "MRK", "Luke": "LUK", "John": "JHN", "Acts": "ACT", "Romans": "ROM", "1 Corinthians": "1CO", "2 Corinthians": "2CO",
+    "Galatians": "GAL", "Ephesians": "EPH", "Philippians": "PHP", "Colossians": "COL", "1 Thessalonians": "1TH", "2 Thessalonians": "2TH",
+    "1 Timothy": "1TI", "2 Timothy": "2TI", "Titus": "TIT", "Philemon": "PHM", "Hebrews": "HEB", "James": "JAS", "1 Peter": "1PE", "2 Peter": "2PE",
+    "1 John": "1JN", "2 John": "2JN", "3 John": "3JN", "Jude": "JUD", "Revelation": "REV"
+};
 
-function fetchLocalChapter(book: string, chapter: number, version: 'ADB' | 'TCB'): Verse[] {
-    const data = bibleData[version];
-    if (data && data[book] && data[book][chapter]) {
-        return Object.entries(data[book][chapter]).map(([verseNum, text]) => ({
-            verse: parseInt(verseNum, 10),
-            text: text,
-        }));
-    }
+
+async function fetchChapterFromApi(book: string, chapter: number, version: 'KJV' | 'ADB' | 'TCB'): Promise<Verse[]> {
+  const bibleId = BIBLE_IDS[version];
+  const bookId = BOOK_IDS[book];
+  
+  if (!bookId) {
+    console.error(`No book ID found for ${book}`);
     return [];
+  }
+  
+  if (!API_KEY) {
+    console.error("API key for api.bible is not configured.");
+    throw new Error("API key is missing. Please add NEXT_PUBLIC_BIBLE_API_KEY to your .env.local file.");
+  }
+  
+  const passageId = `${bookId}.${chapter}`;
+
+  try {
+    const response = await fetch(`${API_URL}/${bibleId}/passages/${passageId}?content-type=text&include-verse-numbers=true`, {
+      headers: { 'api-key': API_KEY }
+    });
+
+    if (!response.ok) {
+      throw new Error(`API call failed with status: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    if (data.data && data.data.content) {
+      // The content is returned as a single string with verse numbers in brackets, e.g., "[1] In the beginning..."
+      // We need to parse this into our Verse[] structure.
+      const content = data.data.content;
+      const verseStrings = content.split(/\[(\d+)\]/).filter(Boolean); // Split by [verse_number]
+      
+      const verses: Verse[] = [];
+      for (let i = 0; i < verseStrings.length; i += 2) {
+          const verseNum = parseInt(verseStrings[i], 10);
+          const verseText = verseStrings[i+1].trim();
+          if (!isNaN(verseNum) && verseText) {
+              verses.push({ verse: verseNum, text: verseText });
+          }
+      }
+      return verses;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error(`Failed to fetch chapter from api.bible for ${version}:`, error);
+    throw error;
+  }
 }
 
 
@@ -67,36 +95,36 @@ export function SBVC({ version }: SBVCProps) {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const loadChapter = async () => {
-        if (!selectedBook || !selectedChapter) return;
-        
-        setIsLoading(true);
-        setError(null);
-        setVerses([]);
+      if (!selectedBook || !selectedChapter) return;
 
-        try {
-            let fetchedVerses: Verse[] = [];
-            if (version === 'KJV') {
-                fetchedVerses = await fetchKJVChapter(selectedBook, selectedChapter);
-                 if (fetchedVerses.length === 0) {
-                    setError('Could not load chapter. Please try a different book or chapter.');
-                }
-            } else {
-                fetchedVerses = fetchLocalChapter(selectedBook, selectedChapter, version);
-                if (fetchedVerses.length === 0) {
-                    setError(`Data for ${version} is not available in local files. Please populate the corresponding JSON file.`);
-                }
-            }
-            setVerses(fetchedVerses);
-        } catch (e) {
-            setError('An error occurred while fetching data.');
-        } finally {
-            setIsLoading(false);
+      setIsLoading(true);
+      setError(null);
+      setVerses([]);
+
+      try {
+        if (!API_KEY) {
+          throw new Error("Bible API key is not configured.");
         }
+        const fetchedVerses = await fetchChapterFromApi(selectedBook, selectedChapter, version);
+        if (fetchedVerses.length === 0) {
+          setError('Could not load chapter. The book may not be available in this translation or the API key is invalid.');
+        }
+        setVerses(fetchedVerses);
+      } catch (e: any) {
+        if (e.message.includes('API key')) {
+             setError("The Bible API key is missing. Please get a free key from api.bible and add it to a .env.local file as NEXT_PUBLIC_BIBLE_API_KEY.");
+        } else {
+            setError('An error occurred while fetching data.');
+        }
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    
+
     loadChapter();
   }, [selectedBook, selectedChapter, version]);
 
@@ -108,16 +136,16 @@ export function SBVC({ version }: SBVCProps) {
     <ScrollArea className="h-full">
       <div className="p-4 text-sm leading-relaxed">
         {isLoading ? (
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-[95%]" />
-                <Skeleton className="h-4 w-[90%]" />
-                <Skeleton className="h-4 w-[98%]" />
-                <Skeleton className="h-4 w-[92%]" />
-                <Skeleton className="h-4 w-[96%]" />
-            </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[95%]" />
+            <Skeleton className="h-4 w-[90%]" />
+            <Skeleton className="h-4 w-[98%]" />
+            <Skeleton className="h-4 w-[92%]" />
+            <Skeleton className="h-4 w-[96%]" />
+          </div>
         ) : error ? (
-            <p className="text-destructive text-center">{error}</p>
-        ) : verses.length > 0 ? verses.map(({verse, text}) => (
+          <p className="text-destructive text-center p-4">{error}</p>
+        ) : verses.length > 0 ? verses.map(({ verse, text }) => (
           <button
             key={verse}
             onClick={() => handleVerseClick(verse, text)}
