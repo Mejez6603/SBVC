@@ -1,18 +1,21 @@
+
 'use client';
 
 import { useAppContext } from '@/context/app-context';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
-import { Moon, Play, Sun, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Moon, Play, Sun, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export function PresentationController() {
-  const { passage, setPassage, theme, toggleTheme, increaseTextSize, decreaseTextSize } = useAppContext();
+  const { passage, setPassage, theme, toggleTheme } = useAppContext();
 
   const handleShowScreen = () => {
     try {
         if(passage) {
             localStorage.setItem('present-passage', JSON.stringify(passage));
+        } else {
+            localStorage.removeItem('present-passage');
         }
       window.open('/present', '_blank', 'noopener,noreferrer');
     } catch (error) {
@@ -61,12 +64,6 @@ export function PresentationController() {
             {theme === 'dark' ? <Sun/> : <Moon />}
         </Button>
         <div />
-        <Button variant="outline" size="icon" onClick={increaseTextSize}>
-          <ZoomIn/>
-        </Button>
-        <Button variant="outline" size="icon" onClick={decreaseTextSize}>
-          <ZoomOut />
-        </Button>
       </div>
     </div>
   );

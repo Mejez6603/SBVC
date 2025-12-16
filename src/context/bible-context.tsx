@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -35,7 +36,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    if (selectedVerse !== null) {
+    if (selectedVerse !== null && selectedBook && selectedChapter) {
       const kjvText =
         bibleVersions['KJV']?.[selectedBook]?.[selectedChapter]?.[
           selectedVerse
@@ -52,7 +53,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
       };
       updatePresentation(newPassage);
     } else {
-      updatePresentation(null);
+        updatePresentation(null);
     }
   }, [selectedVerse, selectedBook, selectedChapter, setPassage]);
 

@@ -5,49 +5,54 @@ import { useEffect, useState } from 'react';
 import type { Passage } from '@/context/app-context';
 import { AnimatePresence, motion } from 'framer-motion';
 
+const THEME_KEY = 'sbvc-theme';
+const PASSAGE_KEY = 'present-passage';
+
 export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  const updatePassage = () => {
+  // Function to update state from localStorage
+  const syncStateFromStorage = () => {
     try {
-      const savedPassage = localStorage.getItem('present-passage');
+      // Sync Theme
+      const savedTheme = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
+      setTheme(savedTheme || 'dark');
+
+      // Sync Passage
+      const savedPassage = localStorage.getItem(PASSAGE_KEY);
       if (savedPassage) {
         setPassage(JSON.parse(savedPassage));
       } else {
         setPassage(null);
       }
     } catch (error) {
-      console.error("Failed to parse passage from local storage:", error);
+      console.error("Failed to parse from local storage:", error);
       setPassage(null);
     }
   };
 
-  const updateTheme = () => {
-    const savedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
-    setTheme(savedTheme || 'dark');
-  };
-
   useEffect(() => {
-    // Initial load for both theme and passage
-    updatePassage();
-    updateTheme();
+    // Initial sync when the component mounts
+    syncStateFromStorage();
 
     const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'present-passage') {
-            updatePassage();
-        }
-        if (e.key === 'sbvc-theme') {
-            updateTheme();
-        }
+      // When another tab changes localStorage, sync this tab's state
+      if (e.key === PASSAGE_KEY || e.key === THEME_KEY) {
+        syncStateFromStorage();
+      }
     };
-
+    
+    // Listen for storage changes from other tabs
     window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup listener on component unmount
     return () => {
         window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
+  // Effect to apply the theme class to the document
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
