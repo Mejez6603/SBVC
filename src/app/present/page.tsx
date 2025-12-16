@@ -21,24 +21,32 @@ export default function PresentPage() {
         console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
       }
     } else {
-      try {
-        await document.exitFullscreen();
-      } catch (err) {
-        console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+      if (document.exitFullscreen) {
+        try {
+          await document.exitFullscreen();
+        } catch (err) {
+          console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+        }
       }
     }
   };
 
-  const syncStateFromStorage = () => {
+  const syncStateFromStorage = (key: string | null) => {
     try {
-      const savedTheme = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
-      setTheme(savedTheme || 'dark');
-
-      const savedPassage = localStorage.getItem(PASSAGE_KEY);
-      setPassage(savedPassage ? JSON.parse(savedPassage) : null);
+      if (key === null || key === THEME_KEY) {
+        const savedTheme = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
+        setTheme(savedTheme || 'dark');
+      }
+      
+      if (key === null || key === PASSAGE_KEY) {
+        const savedPassage = localStorage.getItem(PASSAGE_KEY);
+        setPassage(savedPassage ? JSON.parse(savedPassage) : null);
+      }
     } catch (error) {
       console.error("Failed to parse from local storage:", error);
-      setPassage(null);
+      if (key === null || key === PASSAGE_KEY) {
+        setPassage(null);
+      }
     }
   };
 
@@ -46,12 +54,11 @@ export default function PresentPage() {
     // Set unique name for the presentation window
     window.name = 'present';
     
-    syncStateFromStorage();
+    syncStateFromStorage(null); // Initial sync
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === PASSAGE_KEY || e.key === THEME_KEY) {
-        syncStateFromStorage();
-      }
+      syncStateFromStorage(e.key);
+      
       if (e.key === FULLSCREEN_KEY) {
         toggleFullscreen();
       }
@@ -59,6 +66,7 @@ export default function PresentPage() {
     
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key.toLowerCase() === 'f') {
+            e.preventDefault();
             toggleFullscreen();
         }
     }

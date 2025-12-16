@@ -18,13 +18,15 @@ function Controller() {
   const { selectedTagalogVersion, setSelectedTagalogVersion } = useBible();
 
   const handleFullscreenRequest = () => {
-    // Focus the window first
-    const presentWindow = window.open('', 'present');
+    // This will open the window if it's not already open, and focus it if it is.
+    const presentWindow = window.open('/present', 'present', 'noopener,noreferrer');
     if (presentWindow) {
       presentWindow.focus();
     }
-    // Then send the request
-    localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
+    // A brief delay can sometimes help ensure the window is focused before the event is sent.
+    setTimeout(() => {
+        localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
+    }, 100);
   };
 
   useEffect(() => {
