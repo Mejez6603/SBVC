@@ -7,6 +7,8 @@ import { Card, CardContent } from './ui/card';
 import { Moon, Play, Sun, X, Frame } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
+const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
+
 export function PresentationController() {
   const { passage, setPassage, theme, toggleTheme } = useAppContext();
 
@@ -32,11 +34,16 @@ export function PresentationController() {
     }
   }
 
-  const handleFocusPresentation = () => {
-    const presentWindow = window.open('', 'present');
+  const handleFullscreenRequest = () => {
+    // This will open the window if it's not already open, and focus it if it is.
+    const presentWindow = window.open('/present', 'present', 'noopener,noreferrer');
     if (presentWindow) {
       presentWindow.focus();
     }
+    // A brief delay can sometimes help ensure the window is focused before the event is sent.
+    setTimeout(() => {
+        localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
+    }, 100);
   };
 
   return (
@@ -67,7 +74,7 @@ export function PresentationController() {
         <Button variant="outline" size="icon" onClick={toggleTheme}>
             {theme === 'dark' ? <Sun/> : <Moon />}
         </Button>
-        <Button variant="outline" size="icon" onClick={handleFocusPresentation}>
+        <Button variant="outline" size="icon" onClick={handleFullscreenRequest}>
             <Frame />
         </Button>
       </div>

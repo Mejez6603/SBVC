@@ -52,6 +52,9 @@ export default function PresentPage() {
       if (e.key === PASSAGE_KEY || e.key === THEME_KEY) {
         syncStateFromStorage();
       }
+      if (e.key === FULLSCREEN_KEY) {
+        toggleFullscreen();
+      }
     };
     
     const handleKeyDown = (e: KeyboardEvent) => {

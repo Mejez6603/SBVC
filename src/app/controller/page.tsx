@@ -12,15 +12,29 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 
+const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
+
 function Controller() {
   const { selectedTagalogVersion, setSelectedTagalogVersion } = useBible();
 
+  const handleFullscreenRequest = () => {
+    // Focus the window first
+    const presentWindow = window.open('', 'present');
+    if (presentWindow) {
+      presentWindow.focus();
+    }
+    // Then send the request
+    localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'f') {
-        const presentWindow = window.open('', 'present');
-        if (presentWindow) {
-          presentWindow.focus();
+      if (e.key.toLowerCase() === 'f' && !e.metaKey && !e.ctrlKey) {
+        // Check if the event target is not an input field
+        const target = e.target as HTMLElement;
+        if (target.tagName.toLowerCase() !== 'input' && target.tagName.toLowerCase() !== 'textarea') {
+            e.preventDefault();
+            handleFullscreenRequest();
         }
       }
     };
