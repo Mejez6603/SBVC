@@ -32,11 +32,12 @@ export default function ControllerPage() {
             </div>
             <ChapterList />
             <div className="flex-1 border-r flex flex-col">
-              <div className="grid grid-cols-2 border-b">
+              <div className="grid grid-cols-3 border-b">
                 <div className="p-2 text-center font-bold text-xs">English</div>
                 <div className="p-2 text-center font-bold text-xs border-l">Tagalog</div>
+                <div className="p-2 text-center font-bold text-xs border-l">Tagalog</div>
               </div>
-              <div className="flex-1 grid grid-cols-2">
+              <div className="flex-1 grid grid-cols-3">
                 <div className="flex flex-col">
                   <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
                   <div className="flex-1 overflow-auto">
@@ -47,6 +48,12 @@ export default function ControllerPage() {
                   <div className="p-2 text-center font-semibold text-xs border-b">Ang Bibliya 1905</div>
                   <div className="flex-1 overflow-auto">
                     <SBVC version="TL" />
+                  </div>
+                </div>
+                <div className="flex flex-col border-l">
+                  <div className="p-2 text-center font-semibold text-xs border-b">TCN2015</div>
+                  <div className="flex-1 overflow-auto">
+                    <SBVC version="TCN" />
                   </div>
                 </div>
               </div>

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
 interface SBVCProps {
-  version: 'KJV' | 'TL';
+  version: 'KJV' | 'TL' | 'TCN';
 }
 
 type Verse = {

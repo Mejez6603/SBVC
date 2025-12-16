@@ -5,14 +5,16 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Passage, useAppContext } from './app-context';
 import { bibleVersions } from '@/lib/bible';
 
+type BibleVersion = 'KJV' | 'TL' | 'TCN';
+
 interface BibleContextType {
   selectedBook: string;
   setSelectedBook: (book: string) => void;
   selectedChapter: number;
   setSelectedChapter: (chapter: number) => void;
   selectedVerse: number | null;
-  setSelectedVerse: (verse: number | null, version: 'KJV' | 'TL') => void;
-  selectedVersion: 'KJV' | 'TL';
+  setSelectedVerse: (verse: number | null, version: BibleVersion) => void;
+  selectedVersion: BibleVersion;
 }
 
 const BibleContext = createContext<BibleContextType | undefined>(undefined);
@@ -21,7 +23,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const [selectedBook, setSelectedBook] = useState('Genesis');
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [selectedVerse, setInternalSelectedVerse] = useState<number | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState<'KJV' | 'TL'>('KJV');
+  const [selectedVersion, setSelectedVersion] = useState<BibleVersion>('KJV');
   const { setPassage } = useAppContext();
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     }
   }, [selectedVerse, selectedBook, selectedChapter, selectedVersion, setPassage]);
 
-  const setSelectedVerse = (verse: number | null, version: 'KJV' | 'TL') => {
+  const setSelectedVerse = (verse: number | null, version: BibleVersion) => {
     setInternalSelectedVerse(verse);
     setSelectedVersion(version);
   }

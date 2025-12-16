@@ -1,5 +1,6 @@
 import kjv from './kjv.json';
 import tlv from './tlv.json';
+import tcn from './tcn2015.json';
 
 type BibleData = {
   [book: string]: {
@@ -11,10 +12,12 @@ type BibleData = {
 
 const kjvData = kjv as BibleData;
 const tlvData = tlv as BibleData;
+const tcnData = tcn as BibleData;
 
 export const bibleVersions: { [key: string]: BibleData } = {
   KJV: kjvData,
   TL: tlvData,
+  TCN: tcnData,
 };
 
 export const oldTestamentBooks = [
@@ -39,7 +42,5 @@ export const bookChapters: { [key: string]: number } = {};
 allBooks.forEach(book => {
   if (kjvData[book]) {
     bookChapters[book] = Object.keys(kjvData[book]).length;
-  } else {
-    bookChapters[book] = 0;
   }
 });
