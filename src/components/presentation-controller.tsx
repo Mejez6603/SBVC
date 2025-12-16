@@ -4,8 +4,10 @@
 import { useAppContext } from '@/context/app-context';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
-import { Moon, Play, Sun, X } from 'lucide-react';
+import { Moon, Play, Sun, X, Frame } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+
+const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
 export function PresentationController() {
   const { passage, setPassage, theme, toggleTheme } = useAppContext();
@@ -31,6 +33,15 @@ export function PresentationController() {
       console.error("Could not clear passage from local storage:", error);
     }
   }
+
+  const handleFullscreen = () => {
+    try {
+      // Set a value in localStorage to signal the presentation window
+      localStorage.setItem(FULLSCREEN_KEY, String(new Date().getTime()));
+    } catch (error) {
+      console.error('Could not access local storage:', error);
+    }
+  };
 
   return (
     <div className="p-4 border-b">
@@ -60,7 +71,9 @@ export function PresentationController() {
         <Button variant="outline" size="icon" onClick={toggleTheme}>
             {theme === 'dark' ? <Sun/> : <Moon />}
         </Button>
-        <div />
+        <Button variant="outline" size="icon" onClick={handleFullscreen}>
+            <Frame />
+        </Button>
       </div>
     </div>
   );
