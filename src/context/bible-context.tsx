@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Passage, useAppContext } from './app-context';
+import { bibleVersions } from '@/lib/bible';
 
 interface BibleContextType {
   selectedBook: string;
@@ -22,12 +23,20 @@ export function BibleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (selectedVerse) {
-        // This is a placeholder for fetching verse text
-        const verseText = `This is the text for ${selectedBook} ${selectedChapter}:${selectedVerse}.`;
-        setPassage({
+        const kjvText = bibleVersions['KJV']?.[selectedBook]?.[selectedChapter]?.[selectedVerse] || '';
+        const tlvText = bibleVersions['TL']?.[selectedBook]?.[selectedChapter]?.[selectedVerse] || '';
+        const verseText = `${kjvText}\n\n${tlvText}`;
+
+        const newPassage = {
             reference: `${selectedBook} ${selectedChapter}:${selectedVerse}`,
             text: verseText
-        });
+        };
+        setPassage(newPassage);
+        try {
+            localStorage.setItem('present-passage', JSON.stringify(newPassage));
+        } catch (error) {
+            console.error("Could not save passage to local storage:", error);
+        }
     }
   }, [selectedVerse, selectedBook, selectedChapter, setPassage]);
 
