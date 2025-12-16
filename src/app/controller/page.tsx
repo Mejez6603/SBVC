@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
@@ -46,19 +47,19 @@ function Controller() {
       </header>
       <div className="flex flex-1 min-h-0">
         <div className="flex flex-1">
-          <div className="w-[200px] border-r">
-            <Tabs defaultValue="OLD" className="flex flex-col h-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="OLD">OLD</TabsTrigger>
-                <TabsTrigger value="NEW">NEW</TabsTrigger>
-              </TabsList>
-              <TabsContent value="OLD" className="flex-1 overflow-auto">
-                <BookList testament="OLD" />
-              </TabsContent>
-              <TabsContent value="NEW" className="flex-1 overflow-auto">
-                <BookList testament="NEW" />
-              </TabsContent>
-            </Tabs>
+          <div className="w-[300px] border-r flex flex-col">
+            <div className="grid grid-cols-2">
+              <div className="p-2 text-center font-bold text-xs border-b">OLD</div>
+              <div className="p-2 text-center font-bold text-xs border-b border-l">NEW</div>
+            </div>
+            <div className="flex-1 grid grid-cols-2 overflow-hidden">
+                <ScrollArea className="h-full border-r">
+                    <BookList testament="OLD" />
+                </ScrollArea>
+                <ScrollArea className="h-full">
+                    <BookList testament="NEW" />
+                </ScrollArea>
+            </div>
           </div>
           <ChapterList />
           <div className="flex-1 border-r flex flex-col">
