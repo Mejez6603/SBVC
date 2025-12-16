@@ -34,8 +34,7 @@ export default function ControllerPage() {
             <div className="flex-1 border-r flex flex-col">
               <div className="grid grid-cols-3 border-b">
                 <div className="p-2 text-center font-bold text-xs">English</div>
-                <div className="p-2 text-center font-bold text-xs border-l">Tagalog</div>
-                <div className="p-2 text-center font-bold text-xs border-l">Tagalog</div>
+                <div className="p-2 text-center font-bold text-xs border-l col-span-2">Tagalog</div>
               </div>
               <div className="flex-1 grid grid-cols-3">
                 <div className="flex flex-col">
