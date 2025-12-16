@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useBible } from '@/context/bible-context';
@@ -16,7 +17,7 @@ type Verse = {
 }
 
 export function SBVC({ version }: SBVCProps) {
-  const { selectedBook, selectedChapter, selectedVerse, setSelectedVerse } = useBible();
+  const { selectedBook, selectedChapter, selectedVerse, setSelectedVerse, selectedVersion } = useBible();
   const [verses, setVerses] = useState<Verse[]>([]);
   
   useEffect(() => {
@@ -33,22 +34,26 @@ export function SBVC({ version }: SBVCProps) {
     }
   }, [selectedBook, selectedChapter, version]);
 
+  const handleVerseClick = (verse: number) => {
+    setSelectedVerse(verse, version);
+  }
+
   return (
     <ScrollArea className="h-full">
       <div className="p-4 text-sm leading-relaxed">
         {verses.length > 0 ? verses.map(({verse, text}) => (
           <button
             key={verse}
-            onClick={() => setSelectedVerse(verse)}
+            onClick={() => handleVerseClick(verse)}
             className={cn(
               'flex items-start gap-2 text-left w-full p-2 rounded-md',
-              selectedVerse === verse
+              selectedVerse === verse && selectedVersion === version
                 ? 'bg-blue-600 text-white'
                 : 'hover:bg-accent'
             )}
           >
             <span className="w-6 font-bold opacity-50">{verse}</span>
-            <span className={cn('flex-1', selectedVerse === verse ? 'font-semibold' : '')}>{text}</span>
+            <span className={cn('flex-1', selectedVerse === verse && selectedVersion === version ? 'font-semibold' : '')}>{text}</span>
           </button>
         )) : <p>Select a book and chapter to view.</p>}
       </div>

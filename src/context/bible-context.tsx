@@ -11,7 +11,8 @@ interface BibleContextType {
   selectedChapter: number;
   setSelectedChapter: (chapter: number) => void;
   selectedVerse: number | null;
-  setSelectedVerse: (verse: number | null) => void;
+  setSelectedVerse: (verse: number | null, version: 'KJV' | 'TL') => void;
+  selectedVersion: 'KJV' | 'TL';
 }
 
 const BibleContext = createContext<BibleContextType | undefined>(undefined);
@@ -19,7 +20,8 @@ const BibleContext = createContext<BibleContextType | undefined>(undefined);
 export function BibleProvider({ children }: { children: ReactNode }) {
   const [selectedBook, setSelectedBook] = useState('Genesis');
   const [selectedChapter, setSelectedChapter] = useState(1);
-  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
+  const [selectedVerse, setInternalSelectedVerse] = useState<number | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<'KJV' | 'TL'>('KJV');
   const { setPassage } = useAppContext();
 
   useEffect(() => {
@@ -37,15 +39,10 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     };
 
     if (selectedVerse !== null && selectedBook && selectedChapter) {
-      const kjvText =
-        bibleVersions['KJV']?.[selectedBook]?.[selectedChapter]?.[
+      const verseText =
+        bibleVersions[selectedVersion]?.[selectedBook]?.[selectedChapter]?.[
           selectedVerse
         ] || '';
-      const tlvText =
-        bibleVersions['TL']?.[selectedBook]?.[selectedChapter]?.[
-          selectedVerse
-        ] || '';
-      const verseText = `${kjvText}\n\n${tlvText}`;
 
       const newPassage: Passage = {
         reference: `${selectedBook} ${selectedChapter}:${selectedVerse}`,
@@ -55,22 +52,28 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     } else {
         updatePresentation(null);
     }
-  }, [selectedVerse, selectedBook, selectedChapter, setPassage]);
+  }, [selectedVerse, selectedBook, selectedChapter, selectedVersion, setPassage]);
+
+  const setSelectedVerse = (verse: number | null, version: 'KJV' | 'TL') => {
+    setInternalSelectedVerse(verse);
+    setSelectedVersion(version);
+  }
 
   const value = {
     selectedBook,
     setSelectedBook: (book: string) => {
       setSelectedBook(book);
       setSelectedChapter(1);
-      setSelectedVerse(null);
+      setInternalSelectedVerse(null);
     },
     selectedChapter,
     setSelectedChapter: (chapter: number) => {
       setSelectedChapter(chapter);
-      setSelectedVerse(null);
+      setInternalSelectedVerse(null);
     },
     selectedVerse,
     setSelectedVerse,
+    selectedVersion
   };
 
   return <BibleContext.Provider value={value}>{children}</BibleContext.Provider>;
