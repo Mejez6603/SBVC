@@ -9,7 +9,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 export function PresentationController() {
   const { passage, setPassage, theme, toggleTheme } = useAppContext();
-  let presentWindow: Window | null = null;
 
   const handleShowScreen = () => {
     try {
@@ -18,7 +17,7 @@ export function PresentationController() {
         } else {
             localStorage.removeItem('present-passage');
         }
-      presentWindow = window.open('/present', '_blank', 'noopener,noreferrer');
+      window.open('/present', 'present', 'noopener,noreferrer');
     } catch (error) {
       console.error("Could not open presentation window:", error);
     }
@@ -37,9 +36,6 @@ export function PresentationController() {
     const presentWindow = window.open('', 'present');
     if (presentWindow) {
       presentWindow.focus();
-    } else {
-      // If it doesn't exist, open it.
-      window.open('/present', 'present', 'noopener,noreferrer');
     }
   };
 

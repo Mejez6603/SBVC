@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useBible } from '@/context/bible-context';

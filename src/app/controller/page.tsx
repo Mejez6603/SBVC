@@ -12,10 +12,25 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 
-const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
-
 function Controller() {
   const { selectedTagalogVersion, setSelectedTagalogVersion } = useBible();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'f') {
+        const presentWindow = window.open('', 'present');
+        if (presentWindow) {
+          presentWindow.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="h-screen w-full flex flex-col font-sans text-sm">
