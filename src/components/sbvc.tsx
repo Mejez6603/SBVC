@@ -17,7 +17,7 @@ type Verse = {
 };
 
 const API_URL = 'https://api.scripture.api.bible/v1/bibles';
-const API_KEY = process.env.NEXT_PUBLIC_BIBLE_API_KEY;
+const API_KEY = 'nhFVKnTausxskioYM6ucy';
 
 const BIBLE_IDS = {
     KJV: 'de4e12af7f28f599-01', // KJV
@@ -51,7 +51,7 @@ async function fetchChapterFromApi(book: string, chapter: number, version: 'KJV'
   
   if (!API_KEY) {
     console.error("API key for api.bible is not configured.");
-    throw new Error("API key is missing. Please add NEXT_PUBLIC_BIBLE_API_KEY to your .env file.");
+    throw new Error("API key is missing.");
   }
   
   const passageId = `${bookId}.${chapter}`;
@@ -106,7 +106,7 @@ export function SBVC({ version }: SBVCProps) {
       setVerses([]);
 
       try {
-        if (!process.env.NEXT_PUBLIC_BIBLE_API_KEY) {
+        if (!API_KEY) {
           throw new Error("The Bible API key is missing. Please get a free key from api.bible and add it to a .env file as NEXT_PUBLIC_BIBLE_API_KEY.");
         }
         const fetchedVerses = await fetchChapterFromApi(selectedBook, selectedChapter, version);
@@ -161,5 +161,3 @@ export function SBVC({ version }: SBVCProps) {
     </ScrollArea>
   );
 }
-
-    
