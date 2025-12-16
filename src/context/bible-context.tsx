@@ -22,6 +22,19 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const { setPassage } = useAppContext();
 
   useEffect(() => {
+    const updatePresentation = (passage: Passage) => {
+      setPassage(passage);
+      try {
+        if (passage) {
+          localStorage.setItem('present-passage', JSON.stringify(passage));
+        } else {
+          localStorage.removeItem('present-passage');
+        }
+      } catch (error) {
+        console.error('Could not access local storage:', error);
+      }
+    };
+
     if (selectedVerse !== null) {
       const kjvText =
         bibleVersions['KJV']?.[selectedBook]?.[selectedChapter]?.[
@@ -37,21 +50,9 @@ export function BibleProvider({ children }: { children: ReactNode }) {
         reference: `${selectedBook} ${selectedChapter}:${selectedVerse}`,
         text: verseText,
       };
-
-      setPassage(newPassage);
-      try {
-        // This will trigger the 'storage' event in the presentation window
-        localStorage.setItem('present-passage', JSON.stringify(newPassage));
-      } catch (error) {
-        console.error('Could not save passage to local storage:', error);
-      }
+      updatePresentation(newPassage);
     } else {
-        setPassage(null);
-         try {
-            localStorage.removeItem('present-passage');
-        } catch (error) {
-            console.error('Could not remove passage from local storage:', error);
-        }
+      updatePresentation(null);
     }
   }, [selectedVerse, selectedBook, selectedChapter, setPassage]);
 

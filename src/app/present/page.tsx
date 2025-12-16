@@ -9,39 +9,40 @@ export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
+  const updatePassage = () => {
+    try {
+      const savedPassage = localStorage.getItem('present-passage');
+      if (savedPassage) {
+        setPassage(JSON.parse(savedPassage));
+      } else {
+        setPassage(null);
+      }
+    } catch (error) {
+      console.error("Failed to parse passage from local storage:", error);
+      setPassage(null);
+    }
+  };
+
+  const updateTheme = () => {
+    const savedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
+    if (savedTheme) {
+        setTheme(savedTheme);
+    }
+  };
+
   useEffect(() => {
+    // Initial load
+    updatePassage();
+    updateTheme();
+
     const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'present-passage') {
-            try {
-                const savedPassage = localStorage.getItem('present-passage');
-                if (savedPassage) {
-                    setPassage(JSON.parse(savedPassage));
-                }
-            } catch (error) {
-                console.error("Failed to parse passage from local storage:", error);
-            }
+            updatePassage();
         }
         if (e.key === 'sbvc-theme') {
-            const savedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
-            if (savedTheme) {
-                setTheme(savedTheme);
-            }
+            updateTheme();
         }
     };
-    
-    // Initial load
-    try {
-        const savedPassage = localStorage.getItem('present-passage');
-        if (savedPassage) {
-            setPassage(JSON.parse(savedPassage));
-        }
-        const savedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
-        if (savedTheme) {
-            setTheme(savedTheme);
-        }
-    } catch (error) {
-        console.error("Failed to load data from local storage:", error);
-    }
 
     window.addEventListener('storage', handleStorageChange);
     return () => {
@@ -71,7 +72,7 @@ export default function PresentPage() {
             <h1 className="font-bold text-5xl sm:text-6xl md:text-7xl text-primary/90 mb-8">
               {passage.reference}
             </h1>
-            <p className="text-3xl sm:text-4xl md:text-5xl leading-relaxed text-foreground max-w-7xl mx-auto">
+            <p className="text-3xl sm:text-4xl md:text-5xl leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap">
               {passage.text}
             </p>
           </motion.div>
