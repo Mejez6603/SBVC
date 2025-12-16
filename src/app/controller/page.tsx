@@ -6,7 +6,6 @@ import { SBVC } from '@/components/sbvc';
 import { PresentationController } from '@/components/presentation-controller';
 import { Notepad } from '@/components/notepad';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 
 export default function ControllerPage() {
   return (
@@ -32,17 +31,23 @@ export default function ControllerPage() {
               </Tabs>
             </div>
             <ChapterList />
-            <div className="flex-1 border-r grid grid-cols-2">
-              <div className="flex flex-col">
-                <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
-                <div className="flex-1 overflow-auto">
-                  <SBVC version="KJV" />
-                </div>
+            <div className="flex-1 border-r flex flex-col">
+              <div className="grid grid-cols-2 border-b">
+                <div className="p-2 text-center font-bold text-xs">English</div>
+                <div className="p-2 text-center font-bold text-xs border-l">Tagalog</div>
               </div>
-              <div className="flex flex-col border-l">
-                <div className="p-2 text-center font-semibold text-xs border-b">TL</div>
-                <div className="flex-1 overflow-auto">
-                  <SBVC version="TL" />
+              <div className="flex-1 grid grid-cols-2">
+                <div className="flex flex-col">
+                  <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
+                  <div className="flex-1 overflow-auto">
+                    <SBVC version="KJV" />
+                  </div>
+                </div>
+                <div className="flex flex-col border-l">
+                  <div className="p-2 text-center font-semibold text-xs border-b">Ang Bibliya 1905</div>
+                  <div className="flex-1 overflow-auto">
+                    <SBVC version="TL" />
+                  </div>
                 </div>
               </div>
             </div>
