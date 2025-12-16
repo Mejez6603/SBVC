@@ -17,7 +17,7 @@ type Verse = {
 };
 
 const API_URL = 'https://api.scripture.api.bible/v1/bibles';
-const API_KEY = 'NhCCrgvPK7r1ac_XIs230';
+const API_KEY = process.env.NEXT_PUBLIC_BIBLE_API_KEY;
 
 const BIBLE_IDS = {
     KJV: 'de4e12af7f28f599-01', // KJV
@@ -51,7 +51,7 @@ async function fetchChapterFromApi(book: string, chapter: number, version: 'KJV'
   
   if (!API_KEY) {
     console.error("API key for api.bible is not configured.");
-    throw new Error("API key is missing.");
+    throw new Error("Bible API key is not configured. Please set NEXT_PUBLIC_BIBLE_API_KEY in your .env file.");
   }
   
   const passageId = `${bookId}.${chapter}`;
@@ -101,17 +101,24 @@ export function SBVC({ version }: SBVCProps) {
     // Diagnostic function to check API key and available Bibles
     const checkApiKey = async () => {
       console.log('Running API Key Diagnostic...');
+      if (!API_KEY) {
+        setError("Bible API key is not configured in .env file.");
+        console.error("API Key is not defined!");
+        return;
+      }
       try {
         const response = await fetch(API_URL, {
           headers: { 'api-key': API_KEY }
         });
         const data = await response.json();
         if (!response.ok) {
+          setError(`API Key Diagnostic FAILED: ${data.message || 'Unauthorized'}`);
           console.error('API Key Diagnostic FAILED:', data);
         } else {
           console.log('API Key Diagnostic SUCCESS. Available Bibles:', data.data);
         }
       } catch (e) {
+        setError('API Key Diagnostic FAILED. See console for details.');
         console.error('API Key Diagnostic FAILED with error:', e);
       }
     };
@@ -128,12 +135,12 @@ export function SBVC({ version }: SBVCProps) {
 
       try {
         const fetchedVerses = await fetchChapterFromApi(selectedBook, selectedChapter, version);
-        if (fetchedVerses.length === 0) {
-          setError('Could not load chapter. The book may not be available in this translation or the API key is invalid/missing.');
+        if (fetchedVerses.length === 0 && !error) {
+          setError('Could not load chapter. The book may not be available in this translation.');
         }
         setVerses(fetchedVerses);
       } catch (e: any) {
-        setError(`An error occurred while fetching data: ${e.message}`);
+        setError(e.message || 'An error occurred while fetching data.');
         console.error(e);
       } finally {
         setIsLoading(false);
@@ -141,7 +148,7 @@ export function SBVC({ version }: SBVCProps) {
     };
 
     loadChapter();
-  }, [selectedBook, selectedChapter, version]);
+  }, [selectedBook, selectedChapter, version, error]);
 
   const handleVerseClick = (verseNumber: number, verseText: string) => {
     setSelectedVerse(verseNumber, version, verseText);
