@@ -6,7 +6,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
-interface VerseViewProps {
+interface SBVCProps {
   version: 'KJV' | 'TL';
 }
 
@@ -15,7 +15,7 @@ type Verse = {
     text: string;
 }
 
-export function VerseView({ version }: VerseViewProps) {
+export function SBVC({ version }: SBVCProps) {
   const { selectedBook, selectedChapter, selectedVerse, setSelectedVerse } = useBible();
   const [verses, setVerses] = useState<Verse[]>([]);
   

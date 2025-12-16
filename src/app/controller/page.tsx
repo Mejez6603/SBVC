@@ -2,7 +2,7 @@
 import { BibleProvider } from '@/context/bible-context';
 import { BookList } from '@/components/book-list';
 import { ChapterList } from '@/components/chapter-list';
-import { VerseView } from '@/components/verse-view';
+import { SBVC } from '@/components/sbvc';
 import { PresentationController } from '@/components/presentation-controller';
 import { Notepad } from '@/components/notepad';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,7 +12,7 @@ export default function ControllerPage() {
     <BibleProvider>
       <div className="h-screen w-full flex flex-col font-sans text-sm">
         <header className="h-10 border-b flex items-center px-4 text-xs text-muted-foreground">
-          VerseView Controller
+          SBVC Controller
         </header>
         <div className="flex flex-1 min-h-0">
           <div className="flex flex-1">
@@ -38,10 +38,10 @@ export default function ControllerPage() {
                   <TabsTrigger value="TL">TL</TabsTrigger>
                 </TabsList>
                 <TabsContent value="KJV" className="flex-1 overflow-auto">
-                  <VerseView version="KJV" />
+                  <SBVC version="KJV" />
                 </TabsContent>
                 <TabsContent value="TL" className="flex-1 overflow-auto">
-                  <VerseView version="TL" />
+                  <SBVC version="TL" />
                 </TabsContent>
               </Tabs>
             </div>
