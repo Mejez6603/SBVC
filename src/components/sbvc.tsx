@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useBible } from '@/context/bible-context';
@@ -105,8 +106,8 @@ export function SBVC({ version }: SBVCProps) {
       setVerses([]);
 
       try {
-        if (!API_KEY) {
-          throw new Error("Bible API key is not configured.");
+        if (!process.env.NEXT_PUBLIC_BIBLE_API_KEY) {
+          throw new Error("The Bible API key is missing. Please get a free key from api.bible and add it to a .env file as NEXT_PUBLIC_BIBLE_API_KEY.");
         }
         const fetchedVerses = await fetchChapterFromApi(selectedBook, selectedChapter, version);
         if (fetchedVerses.length === 0) {
@@ -114,11 +115,7 @@ export function SBVC({ version }: SBVCProps) {
         }
         setVerses(fetchedVerses);
       } catch (e: any) {
-        if (e.message.includes('API key')) {
-             setError("The Bible API key is missing. Please get a free key from api.bible and add it to a .env file as NEXT_PUBLIC_BIBLE_API_KEY.");
-        } else {
-            setError(`An error occurred while fetching data: ${e.message}`);
-        }
+        setError(`An error occurred while fetching data: ${e.message}`);
         console.error(e);
       } finally {
         setIsLoading(false);
@@ -164,3 +161,5 @@ export function SBVC({ version }: SBVCProps) {
     </ScrollArea>
   );
 }
+
+    
