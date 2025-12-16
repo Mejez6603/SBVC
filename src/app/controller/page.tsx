@@ -72,7 +72,7 @@ function Controller() {
             <div className="flex-1 grid grid-cols-2 overflow-hidden">
               <div className="flex flex-col border-r">
                 <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1">
                   <SBVC version="KJV" />
                 </div>
               </div>
@@ -97,7 +97,7 @@ function Controller() {
                       </Button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1">
                   <SBVC version={selectedTagalogVersion} />
                 </div>
               </div>
