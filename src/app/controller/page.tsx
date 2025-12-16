@@ -69,14 +69,14 @@ function Controller() {
                 Tagalog
               </div>
             </div>
-            <div className="flex-1 grid grid-cols-2 overflow-hidden">
-              <div className="flex flex-col border-r h-full">
+            <div className="flex flex-1 min-h-0">
+              <div className="flex-1 flex flex-col border-r h-full">
                 <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
                 <div className="flex-1 overflow-hidden">
                   <SBVC version="KJV" />
                 </div>
               </div>
-              <div className="flex flex-col h-full">
+              <div className="flex-1 flex flex-col h-full">
                 <div className="p-2 text-center font-semibold text-xs border-b">
                   <div className="flex justify-center gap-2">
                       <Button 
