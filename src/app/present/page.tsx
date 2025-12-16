@@ -11,20 +11,13 @@ export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  // Function to update state from localStorage
   const syncStateFromStorage = () => {
     try {
-      // Sync Theme
       const savedTheme = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
       setTheme(savedTheme || 'dark');
 
-      // Sync Passage
       const savedPassage = localStorage.getItem(PASSAGE_KEY);
-      if (savedPassage) {
-        setPassage(JSON.parse(savedPassage));
-      } else {
-        setPassage(null);
-      }
+      setPassage(savedPassage ? JSON.parse(savedPassage) : null);
     } catch (error) {
       console.error("Failed to parse from local storage:", error);
       setPassage(null);
@@ -32,26 +25,21 @@ export default function PresentPage() {
   };
 
   useEffect(() => {
-    // Initial sync when the component mounts
     syncStateFromStorage();
 
     const handleStorageChange = (e: StorageEvent) => {
-      // When another tab changes localStorage, sync this tab's state
       if (e.key === PASSAGE_KEY || e.key === THEME_KEY) {
         syncStateFromStorage();
       }
     };
     
-    // Listen for storage changes from other tabs
     window.addEventListener('storage', handleStorageChange);
 
-    // Cleanup listener on component unmount
     return () => {
         window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
-  // Effect to apply the theme class to the document
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
