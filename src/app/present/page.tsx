@@ -25,13 +25,11 @@ export default function PresentPage() {
 
   const updateTheme = () => {
     const savedTheme = localStorage.getItem('sbvc-theme') as 'dark' | 'light' | null;
-    if (savedTheme) {
-        setTheme(savedTheme);
-    }
+    setTheme(savedTheme || 'dark');
   };
 
   useEffect(() => {
-    // Initial load
+    // Initial load for both theme and passage
     updatePassage();
     updateTheme();
 
@@ -51,10 +49,7 @@ export default function PresentPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      document.documentElement.className = '';
-      document.documentElement.classList.add(theme);
-    }
+    document.documentElement.className = theme;
   }, [theme]);
 
   return (
