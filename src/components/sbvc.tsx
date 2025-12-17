@@ -7,10 +7,6 @@ import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
 
-import KJVData from '@/lib/kjv.json';
-import ADBData from '@/lib/adb1905.json';
-import TCBData from '@/lib/tcb2015.json';
-
 interface SBVCProps {
   version: 'KJV' | 'ADB' | 'TCB';
 }
@@ -20,32 +16,13 @@ type Verse = {
   text: string;
 };
 
-type BibleData = {
-  [book: string]: {
-    [chapter: string]: {
-      [verse: string]: string;
-    };
-  };
+type ChapterData = {
+  [verse: string]: string;
 };
 
-const BIBLE_DATA: { [key in 'KJV' | 'ADB' | 'TCB']: BibleData } = {
-  KJV: KJVData as BibleData,
-  ADB: ADBData as BibleData,
-  TCB: TCBData as BibleData,
+type BookData = {
+  [chapter: string]: ChapterData;
 };
-
-function getChapterFromLocal(book: string, chapter: number, version: 'KJV' | 'ADB' | 'TCB'): Verse[] {
-  const bible = BIBLE_DATA[version];
-  if (bible && bible[book] && bible[book][chapter]) {
-    const chapterData = bible[book][chapter];
-    return Object.entries(chapterData).map(([verseNum, text]) => ({
-      verse: parseInt(verseNum, 10),
-      text,
-    }));
-  }
-  return [];
-}
-
 
 export function SBVC({ version }: SBVCProps) {
   const { selectedBook, selectedChapter, selectedVerse, setSelectedVerse, selectedVersion } = useBible();
@@ -54,7 +31,7 @@ export function SBVC({ version }: SBVCProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadChapter = () => {
+    const loadChapter = async () => {
       if (!selectedBook || !selectedChapter) return;
 
       setIsLoading(true);
@@ -62,13 +39,31 @@ export function SBVC({ version }: SBVCProps) {
       setVerses([]);
 
       try {
-        const fetchedVerses = getChapterFromLocal(selectedBook, selectedChapter, version);
-        if (fetchedVerses.length === 0) {
-          setError(`Could not load ${selectedBook} ${selectedChapter} for ${version}. Please ensure the data exists in the local JSON file.`);
+        const bookFileName = selectedBook.toLowerCase().replace(/\s/g, '');
+        const versionDir = version === 'KJV' ? 'kjv' : version === 'ADB' ? 'adb' : 'tcb';
+        const response = await fetch(`/bible/${versionDir}/${bookFileName}.json`);
+        
+        if (!response.ok) {
+          throw new Error(`Could not load ${selectedBook}. File not found.`);
         }
-        setVerses(fetchedVerses);
+
+        const bookData: BookData = await response.json();
+        
+        const chapterData = bookData[selectedChapter];
+
+        if (chapterData) {
+            const fetchedVerses = Object.entries(chapterData).map(([verseNum, text]) => ({
+              verse: parseInt(verseNum, 10),
+              text,
+            }));
+            setVerses(fetchedVerses);
+        } else {
+             throw new Error(`Chapter ${selectedChapter} not found for ${selectedBook}.`);
+        }
+
       } catch (e: any) {
         setError(e.message || `An error occurred while loading data for ${version}.`);
+        setVerses([]);
         console.error(e);
       } finally {
         setIsLoading(false);
