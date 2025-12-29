@@ -42,6 +42,7 @@ export default function PresentPage() {
   const [adjustedFontSize, setAdjustedFontSize] = useState(customization.fontSize);
   const textRef = useRef<HTMLParagraphElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
@@ -139,31 +140,40 @@ export default function PresentPage() {
   }, [theme]);
   
   useEffect(() => {
-    if (passage && textRef.current && containerRef.current) {
-        let currentFontSize = customization.fontSize;
-        textRef.current.style.fontSize = `${currentFontSize}rem`;
+    const adjustFontSize = () => {
+        if (passage && textRef.current && containerRef.current && contentWrapperRef.current) {
+            let currentFontSize = customization.fontSize;
+            const contentWrapper = contentWrapperRef.current;
+            const container = containerRef.current;
 
-        const checkOverflow = () => {
-            const isOverflowing = textRef.current!.scrollHeight > containerRef.current!.clientHeight || textRef.current!.scrollWidth > containerRef.current!.clientWidth;
-            return isOverflowing;
-        }
-
-        if (checkOverflow()) {
-            while(checkOverflow() && currentFontSize > 1) {
-                currentFontSize -= 0.2;
-                textRef.current.style.fontSize = `${currentFontSize}rem`;
+            const checkOverflow = () => {
+                return contentWrapper.scrollHeight > container.clientHeight;
             }
+
+            // Temporarily set a large font size to establish a baseline
+            contentWrapper.style.fontSize = `${currentFontSize}rem`;
+
+            while(checkOverflow() && currentFontSize > 0.5) {
+                currentFontSize -= 0.1;
+                contentWrapper.style.fontSize = `${currentFontSize}rem`;
+            }
+            setAdjustedFontSize(currentFontSize);
+        } else {
+            setAdjustedFontSize(customization.fontSize);
         }
-        setAdjustedFontSize(currentFontSize);
-    } else {
-        setAdjustedFontSize(customization.fontSize);
     }
-}, [passage, customization.fontSize, customization.fontFamily, customization.textAlign, containerRef.current?.clientWidth, containerRef.current?.clientHeight]);
+    // Adjust on initial load and when content changes
+    adjustFontSize();
+    
+    // Adjust on window resize
+    window.addEventListener('resize', adjustFontSize);
+    return () => window.removeEventListener('resize', adjustFontSize);
+
+}, [passage, customization, containerRef, contentWrapperRef]);
 
 
   const passageStyle = {
     fontFamily: customization.fontFamily,
-    fontSize: `${adjustedFontSize}rem`,
     textAlign: customization.textAlign,
   }
   
@@ -177,6 +187,10 @@ export default function PresentPage() {
     paddingLeft: `${customization.horizontalPadding}rem`,
     paddingRight: `${customization.horizontalPadding}rem`,
   }
+  
+  const contentWrapperStyle = {
+    fontSize: `${adjustedFontSize}rem`
+  }
 
   return (
     <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background py-4 transition-colors duration-300 overflow-hidden" style={mainStyle}>
@@ -184,11 +198,13 @@ export default function PresentPage() {
         {passage ? (
           <motion.div
             key={passage.reference}
+            ref={contentWrapperRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="w-full h-full flex flex-col items-center justify-center"
+            style={contentWrapperStyle}
           >
             <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
