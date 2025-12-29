@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Input } from './ui/input';
@@ -42,7 +41,7 @@ export function Notepad() {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 space-y-4 justify-start">
+    <div className="flex flex-col p-4 space-y-4">
       <div>
         <div className="font-semibold text-sm mb-2">AI Topic Suggestions</div>
         <div className="relative">
@@ -64,7 +63,7 @@ export function Notepad() {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 border rounded-md bg-background">
+      <ScrollArea className="flex-1 border rounded-md bg-background min-h-[200px]">
         {isLoading ? (
             <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center">
                 <Loader className="animate-spin mr-2 h-4 w-4" />
