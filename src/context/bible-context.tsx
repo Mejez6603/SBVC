@@ -54,26 +54,34 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     }
   }, [selectedVerse, selectedBook, selectedChapter, selectedVersion, selectedVerseText, setPassage]);
 
+  const handleSetSelectedBook = (book: string) => {
+    setSelectedBook(book);
+    setSelectedChapter(1);
+    // Do not clear the selected verse
+  };
+
+  const handleSetSelectedChapter = (chapter: number) => {
+    setSelectedChapter(chapter);
+    // Do not clear the selected verse
+  };
+
   const setSelectedVerse = (verse: number | null, version: BibleVersion, text: string) => {
-    setInternalSelectedVerse(verse);
-    setSelectedVersion(version);
-    setSelectedVerseText(text);
+    if (verse === selectedVerse && version === selectedVersion) {
+        // If clicking the same verse again, clear the selection
+        setInternalSelectedVerse(null);
+        setSelectedVerseText('');
+    } else {
+        setInternalSelectedVerse(verse);
+        setSelectedVersion(version);
+        setSelectedVerseText(text);
+    }
   }
 
   const value = {
     selectedBook,
-    setSelectedBook: (book: string) => {
-      setSelectedBook(book);
-      setSelectedChapter(1);
-      setInternalSelectedVerse(null);
-      setSelectedVerseText('');
-    },
+    setSelectedBook: handleSetSelectedBook,
     selectedChapter,
-    setSelectedChapter: (chapter: number) => {
-      setSelectedChapter(chapter);
-      setInternalSelectedVerse(null);
-      setSelectedVerseText('');
-    },
+    setSelectedChapter: handleSetSelectedChapter,
     selectedVerse,
     setSelectedVerse,
     selectedVersion,
