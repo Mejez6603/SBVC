@@ -80,7 +80,7 @@ export function Notepad() {
       );
     }
     return (
-      <ScrollArea className="flex-1 border rounded-md bg-background min-h-0">
+      <ScrollArea className="h-full border rounded-md bg-background">
         <div className="p-2">
           {suggestions.map((suggestion, index) => (
             <button 
