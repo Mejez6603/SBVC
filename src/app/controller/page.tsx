@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CustomizationController } from '@/components/customization-controller';
 import { Separator } from '@/components/ui/separator';
+import { NavigationMenu } from '@/components/navigation-menu';
 
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
@@ -43,9 +44,7 @@ function Controller() {
 
   return (
     <div className="h-screen w-full flex flex-col font-sans text-sm">
-      <header className="h-10 border-b flex items-center px-4 text-xs text-muted-foreground">
-        SBVC Controller
-      </header>
+      <NavigationMenu />
       <div className="flex flex-1 min-h-0">
         <div className="flex flex-1">
           <div className="w-[300px] border-r flex flex-col">
