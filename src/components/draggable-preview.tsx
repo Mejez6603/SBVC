@@ -116,7 +116,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
     <div 
         ref={setContainerRef}
         className={cn(
-            "aspect-video w-full rounded-md p-4 relative overflow-hidden",
+            "aspect-video w-full rounded-md p-2 relative overflow-hidden flex flex-col items-center justify-center",
             theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'
         )}
     >
@@ -130,7 +130,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
                 x: customization.positions.title.x * previewScale, 
                 y: customization.positions.title.y * previewScale 
             }}
-            className="font-bold mb-2 cursor-grab line-clamp-1"
+            className="font-bold mb-1 cursor-grab line-clamp-1"
             style={titleStyle}
         >
             {passage.reference}

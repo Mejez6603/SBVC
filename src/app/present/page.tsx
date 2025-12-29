@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { Passage } from '@/context/app-context';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -36,6 +36,10 @@ export default function PresentPage() {
       text: { x: 0, y: 0 },
     },
   });
+
+  const [adjustedFontSize, setAdjustedFontSize] = useState(customization.fontSize);
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
@@ -127,9 +131,32 @@ export default function PresentPage() {
     document.documentElement.className = theme;
   }, [theme]);
   
+  useEffect(() => {
+    if (passage && textRef.current && containerRef.current) {
+        let currentFontSize = customization.fontSize;
+        textRef.current.style.fontSize = `${currentFontSize}rem`;
+
+        const checkOverflow = () => {
+            const isOverflowing = textRef.current!.scrollHeight > containerRef.current!.clientHeight || textRef.current!.scrollWidth > containerRef.current!.clientWidth;
+            return isOverflowing;
+        }
+
+        if (checkOverflow()) {
+            while(checkOverflow() && currentFontSize > 1) {
+                currentFontSize -= 0.2;
+                textRef.current.style.fontSize = `${currentFontSize}rem`;
+            }
+        }
+        setAdjustedFontSize(currentFontSize);
+    } else {
+        setAdjustedFontSize(customization.fontSize);
+    }
+}, [passage, customization.fontSize, customization.fontFamily]);
+
+
   const passageStyle = {
     fontFamily: customization.fontFamily,
-    fontSize: `${customization.fontSize}rem`,
+    fontSize: `${adjustedFontSize}rem`,
     textAlign: customization.textAlign,
   }
   
@@ -140,7 +167,7 @@ export default function PresentPage() {
   }
 
   return (
-    <main className="flex h-screen w-screen items-center justify-center bg-background p-8 transition-colors duration-300 overflow-hidden">
+    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background p-4 transition-colors duration-300 overflow-hidden">
       <AnimatePresence mode="wait">
         {passage ? (
           <motion.div
@@ -149,22 +176,27 @@ export default function PresentPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="w-full h-full"
+            className="w-full h-full flex flex-col items-center justify-center"
           >
             <motion.h1 
+                drag
+                dragMomentum={false}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, x: customization.positions.title.x, y: customization.positions.title.y }}
                 exit={{ opacity: 0, y: -20 }}
-                className="font-bold text-primary/90 mb-8"
+                className="font-bold text-primary/90 mb-4"
                 style={titleStyle}
             >
               {passage.reference}
             </motion.h1>
             <motion.p
+                ref={textRef}
+                drag
+                dragMomentum={false}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0, x: customization.positions.text.x, y: customization.positions.text.y }}
+                animate={{ opacity: 1, x: customization.positions.text.x, y: customization.positions.text.y }}
                 exit={{ opacity: 0, y: -20 }}
-                className="leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap"
+                className="leading-relaxed text-foreground max-w-7xl whitespace-pre-wrap"
                 style={passageStyle}
             >
               {passage.text}
