@@ -116,7 +116,7 @@ function Controller() {
           <Tabs defaultValue="main" className="flex-1 flex flex-col min-h-0">
             <TabsList className="grid w-full grid-cols-2 m-2">
                 <TabsTrigger value="main">Controls</TabsTrigger>
-                <TabsTrigger value="ai">AI</TabsTrigger>
+                <TabsTrigger value="ai">Search</TabsTrigger>
             </TabsList>
             <TabsContent value="main" className="flex-1 flex flex-col min-h-0">
                 <PresentationController />
