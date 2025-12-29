@@ -10,11 +10,11 @@
 import { z } from 'genkit';
 import path from 'path';
 import fs from 'fs/promises';
-import { oldTestamentBooks, newTestamentBooks, bookChapters } from '@/lib/bible';
+import { oldTestamentBooks, newTestamentBooks } from '@/lib/bible';
 
 const PassageSchema = z.object({
     reference: z.string().describe('The Bible passage reference (e.g., "John 3:16").'),
-    text: z.string().describe('The full text of the Bible passage.'),
+    text: z.string().describe('The full text of the Bible passage.').optional(),
 });
 
 const SearchBibleInputSchema = z.object({
@@ -35,6 +35,7 @@ const bibleVersions = ['kjv', 'adb', 'tcb'];
 const bibleDataCache: { [version: string]: { [book: string]: any } } = {};
 
 async function loadBook(version: string, bookName: string) {
+  if (!bookName) return null;
   const bookFileName = bookName.toLowerCase().replace(/\s/g, '') + '.json';
   if (bibleDataCache[version] && bibleDataCache[version][bookFileName]) {
     return bibleDataCache[version][bookFileName];
@@ -91,26 +92,51 @@ export async function searchBible(input: SearchBibleInput): Promise<SearchBibleO
     }
   }
 
+  const sortedReferences = Array.from(foundReferences).sort((a, b) => {
+      const aMatch = a.match(/(\d?\s?[a-zA-Z\s]+)\s(\d+):(\d+)/);
+      const bMatch = b.match(/(\d?\s?[a-zA-Z\s]+)\s(\d+):(\d+)/);
+
+      if (!aMatch || !bMatch) return 0;
+
+      const [, aBookName, aChapter, aVerse] = aMatch;
+      const [, bBookName, bChapter, bVerse] = bMatch;
+      
+      const aBookIndex = allBooks.indexOf(aBookName.trim());
+      const bBookIndex = allBooks.indexOf(bBookName.trim());
+
+      if (aBookIndex !== bBookIndex) {
+          return aBookIndex - bBookIndex;
+      }
+      if (parseInt(aChapter) !== parseInt(bChapter)) {
+          return parseInt(aChapter) - parseInt(bChapter);
+      }
+      return parseInt(aVerse) - parseInt(bVerse);
+  });
+
+
   // Now, for each unique reference, get the text from all three versions
-  for (const reference of Array.from(foundReferences).sort()) {
+  for (const reference of sortedReferences) {
     const match = reference.match(/(\d?\s?[a-zA-Z\s]+)\s(\d+):(\d+)/);
     if (!match) continue;
 
     const [, bookName, chapter, verse] = match;
     
-    const kjvBookData = await loadBook('kjv', bookName);
-    const adbBookData = await loadBook('adb', bookName);
-    const tcbBookData = await loadBook('tcb', bookName);
+    const kjvBookData = await loadBook('kjv', bookName.trim());
+    const adbBookData = await loadBook('adb', bookName.trim());
+    const tcbBookData = await loadBook('tcb', bookName.trim());
 
-    if (kjvBookData && kjvBookData[chapter] && kjvBookData[chapter][verse]) {
-        results.kjv.push({ reference, text: kjvBookData[chapter][verse] });
-    }
-    if (adbBookData && adbBookData[chapter] && adbBookData[chapter][verse]) {
-        results.adb.push({ reference, text: adbBookData[chapter][verse] });
-    }
-    if (tcbBookData && tcbBookData[chapter] && tcbBookData[chapter][verse]) {
-        results.tcb.push({ reference, text: tcbBookData[chapter][verse] });
-    }
+    results.kjv.push({ 
+        reference, 
+        text: kjvBookData?.[chapter]?.[verse] 
+    });
+    results.adb.push({ 
+        reference, 
+        text: adbBookData?.[chapter]?.[verse] 
+    });
+    results.tcb.push({ 
+        reference, 
+        text: tcbBookData?.[chapter]?.[verse] 
+    });
   }
 
   return results;
