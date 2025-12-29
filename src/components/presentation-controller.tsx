@@ -3,10 +3,12 @@
 import { useAppContext } from '@/context/app-context';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
-import { Moon, Play, Sun, X, RefreshCw } from 'lucide-react';
+import { Moon, Play, Sun, X, RefreshCw, Maximize } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { DraggablePreview } from './draggable-preview';
 
 const CUSTOMIZATION_KEY = 'sbvc-customization';
+const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
 export function PresentationController() {
   const { passage, setPassage, theme, toggleTheme } = useAppContext();
@@ -42,25 +44,28 @@ export function PresentationController() {
     }
   };
 
+  const handleFullscreenRequest = () => {
+    localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
+  };
+
   return (
     <div className="p-4 border-b">
       <AnimatePresence>
-        {passage && (
+        {passage ? (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            <Card className="bg-card/50">
-              <CardContent className="p-3">
-                <div className="font-semibold text-sm mb-2">{passage.reference}</div>
-                <p className="text-xs text-muted-foreground line-clamp-3">{passage.text}</p>
-              </CardContent>
-            </Card>
+            <DraggablePreview passage={passage} />
           </motion.div>
+        ) : (
+            <Card className="bg-card/50 aspect-video flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">No passage selected</p>
+            </Card>
         )}
       </AnimatePresence>
-      <div className="grid grid-cols-4 gap-2 mt-4">
+      <div className="grid grid-cols-5 gap-2 mt-4">
         <Button variant="outline" size="icon" onClick={handleShowScreen}>
           <Play />
         </Button>
@@ -72,6 +77,9 @@ export function PresentationController() {
         </Button>
         <Button variant="outline" size="icon" onClick={handleResetPosition}>
             <RefreshCw />
+        </Button>
+        <Button variant="outline" size="icon" onClick={handleFullscreenRequest}>
+            <Maximize />
         </Button>
       </div>
     </div>

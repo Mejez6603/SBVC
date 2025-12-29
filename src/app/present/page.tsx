@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Passage } from '@/context/app-context';
-import { AnimatePresence, motion, PanInfo } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const THEME_KEY = 'sbvc-theme';
 const PASSAGE_KEY = 'present-passage';
@@ -34,8 +34,6 @@ export default function PresentPage() {
       text: { x: 0, y: 0 },
     },
   });
-  
-  const [isDragging, setIsDragging] = useState(false);
 
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
@@ -54,19 +52,6 @@ export default function PresentPage() {
       }
     }
   };
-  
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo, type: 'title' | 'text') => {
-    const newPositions = { ...customization.positions };
-    newPositions[type] = {
-      x: customization.positions[type].x + info.delta.x,
-      y: customization.positions[type].y + info.delta.y,
-    };
-    
-    const newCustomization = { ...customization, positions: newPositions };
-    setCustomization(newCustomization);
-    localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
-  };
-
 
   useEffect(() => {
     const syncStateFromStorage = (key: string | null) => {
@@ -146,7 +131,6 @@ export default function PresentPage() {
   const titleStyle = {
     ...passageStyle,
     fontSize: `${customization.titleFontSize}rem`,
-    cursor: isDragging ? 'grabbing' : 'grab'
   }
 
   return (
@@ -165,12 +149,7 @@ export default function PresentPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, x: customization.positions.title.x, y: customization.positions.title.y }}
                 exit={{ opacity: 0, y: -20 }}
-                drag
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                onDrag={(e, i) => handleDrag(e, i, 'title')}
-                dragMomentum={false}
-                className="font-bold text-primary/90 mb-8 cursor-grab text-center"
+                className="font-bold text-primary/90 mb-8 text-center"
                 style={titleStyle}
             >
               {passage.reference}
@@ -179,13 +158,8 @@ export default function PresentPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0, x: customization.positions.text.x, y: customization.positions.text.y }}
                 exit={{ opacity: 0, y: -20 }}
-                drag
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                onDrag={(e, i) => handleDrag(e, i, 'text')}
-                dragMomentum={false}
-                className="leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap cursor-grab"
-                style={{ ...passageStyle, cursor: isDragging ? 'grabbing' : 'grab' }}
+                className="leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap"
+                style={passageStyle}
             >
               {passage.text}
             </motion.p>

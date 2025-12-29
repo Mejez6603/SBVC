@@ -6,7 +6,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Slider } from './ui/slider';
 import { Button } from './ui/button';
-import { AlignLeft, AlignCenter, AlignRight, RefreshCw } from 'lucide-react';
+import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { Separator } from './ui/separator';
 
 const CUSTOMIZATION_KEY = 'sbvc-customization';
