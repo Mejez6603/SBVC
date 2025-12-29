@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Loader, Search as SearchIcon } from 'lucide-react';
 import { useState } from 'react';
-import { suggestRelevantPassages } from '@/ai/flows/suggest-relevant-passages';
+import { searchBible } from '@/ai/flows/search-bible';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
@@ -27,7 +27,7 @@ export function Notepad() {
     setIsLoading(true);
     setSuggestions([]);
     try {
-      const result = await suggestRelevantPassages({ topic });
+      const result = await searchBible({ topic });
       setSuggestions(result.passages);
     } catch (error) {
       console.error('Failed to get suggestions:', error);
@@ -81,7 +81,7 @@ export function Notepad() {
         {isLoading ? (
             <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center">
                 <Loader className="animate-spin mr-2 h-4 w-4" />
-                <span>Getting suggestions...</span>
+                <span>Searching...</span>
             </div>
         ) : suggestions.length > 0 ? (
           <div className="p-2">
@@ -98,7 +98,7 @@ export function Notepad() {
           </div>
         ) : (
           <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
-            Enter a topic above to get related Bible passages.
+            Enter a term to search for in the Bible (KJV).
           </div>
         )}
       </ScrollArea>
