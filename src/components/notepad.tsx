@@ -73,9 +73,9 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
         getScrollElement: () => parentRef.current,
         estimateSize: (index) => {
             const text = suggestions[index].text || '';
-            const lines = text.split('\n').length;
-            const baseHeight = 40; // Approx height for reference
-            const textHeight = lines * 15;
+            const lineBreaks = (text.match(/\n/g) || []).length;
+            const baseHeight = 38; // for reference + padding
+            const textHeight = (Math.floor(text.length / 50) + lineBreaks) * 15;
             return baseHeight + textHeight;
         },
         overscan: 5,
