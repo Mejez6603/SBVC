@@ -47,14 +47,14 @@ export default function PresentPage() {
     if (!document.fullscreenElement) {
       try {
         await document.documentElement.requestFullscreen();
-      } catch (err) {
+      } catch (err: any) {
         console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
       }
     } else {
       if (document.exitFullscreen) {
         try {
           await document.exitFullscreen();
-        } catch (err) {
+        } catch (err: any) {
           console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
         }
       }
@@ -112,6 +112,8 @@ export default function PresentPage() {
       syncStateFromStorage(e.key);
       
       if (e.key === FULLSCREEN_KEY) {
+        // This is not guaranteed to work due to browser security restrictions
+        // but we keep it as a secondary trigger. The primary is the keydown.
         toggleFullscreen();
       }
     };
