@@ -15,14 +15,20 @@ type Customization = {
   fontFamily: string;
   fontSize: number;
   textAlign: 'left' | 'center' | 'right';
-  position: { x: number; y: number };
+  positions: {
+    title: { x: number; y: number };
+    text: { x: number; y: number };
+  };
 };
 
 const defaultCustomization: Customization = {
     fontFamily: 'Inter',
     fontSize: 5,
     textAlign: 'center',
-    position: { x: 0, y: 0 },
+    positions: { 
+        title: { x: 0, y: 0 },
+        text: { x: 0, y: 0 } 
+    },
 };
 
 export function CustomizationController() {
@@ -31,7 +37,13 @@ export function CustomizationController() {
   useEffect(() => {
     const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
     if (savedCustomization) {
-      setCustomization(JSON.parse(savedCustomization));
+      const parsed = JSON.parse(savedCustomization);
+      // Backwards compatibility for old structure
+      if (parsed.position) {
+          parsed.positions = { title: parsed.position, text: parsed.position };
+          delete parsed.position;
+      }
+      setCustomization(parsed);
     }
   }, []);
 
@@ -110,9 +122,9 @@ export function CustomizationController() {
 
       <div>
         <Label>Position</Label>
-        <p className="text-xs text-muted-foreground mb-2">You can drag the text on the presentation screen to reposition it.</p>
-        <Button variant="outline" size="sm" onClick={() => updateCustomization({ position: { x: 0, y: 0 } })}>
-          <RefreshCw className="mr-2 h-4 w-4" /> Reset Position
+        <p className="text-xs text-muted-foreground mb-2">You can drag the text and title on the presentation screen to reposition them.</p>
+        <Button variant="outline" size="sm" onClick={() => updateCustomization({ positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } } })}>
+          <RefreshCw className="mr-2 h-4 w-4" /> Reset Positions
         </Button>
       </div>
       

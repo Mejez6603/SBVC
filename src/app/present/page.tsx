@@ -14,7 +14,10 @@ type Customization = {
   fontFamily: string;
   fontSize: number;
   textAlign: 'left' | 'center' | 'right';
-  position: { x: number, y: number };
+  positions: {
+    title: { x: number; y: number };
+    text: { x: number; y: number };
+  };
 };
 
 export default function PresentPage() {
@@ -24,7 +27,10 @@ export default function PresentPage() {
     fontFamily: 'Inter',
     fontSize: 5,
     textAlign: 'center',
-    position: { x: 0, y: 0 },
+    positions: {
+      title: { x: 0, y: 0 },
+      text: { x: 0, y: 0 },
+    },
   });
   
   const [isDragging, setIsDragging] = useState(false);
@@ -47,13 +53,14 @@ export default function PresentPage() {
     }
   };
   
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const newPos = {
-        x: customization.position.x + info.delta.x,
-        y: customization.position.y + info.delta.y,
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo, type: 'title' | 'text') => {
+    const newPositions = { ...customization.positions };
+    newPositions[type] = {
+      x: customization.positions[type].x + info.delta.x,
+      y: customization.positions[type].y + info.delta.y,
     };
     
-    const newCustomization = { ...customization, position: newPos };
+    const newCustomization = { ...customization, positions: newPositions };
     setCustomization(newCustomization);
     localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
   };
@@ -75,7 +82,13 @@ export default function PresentPage() {
         if (key === null || key === CUSTOMIZATION_KEY) {
             const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
             if (savedCustomization) {
-                setCustomization(JSON.parse(savedCustomization));
+                const parsed = JSON.parse(savedCustomization);
+                // Backwards compatibility for old position structure
+                if (parsed.position) {
+                    parsed.positions = { title: parsed.position, text: parsed.position };
+                    delete parsed.position;
+                }
+                setCustomization(parsed);
             }
         }
       } catch (error) {
@@ -131,26 +144,40 @@ export default function PresentPage() {
         {passage ? (
           <motion.div
             key={passage.reference}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0, x: customization.position.x, y: customization.position.y }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            drag
-            onDragStart={() => setIsDragging(true)}
-            onDragEnd={() => setIsDragging(false)}
-            onDrag={handleDrag}
-            dragMomentum={false}
-            className="text-center cursor-grab"
-            style={{
-                cursor: isDragging ? 'grabbing' : 'grab'
-            }}
+            className="w-full h-full"
           >
-            <h1 className="font-bold text-5xl sm:text-6xl md:text-7xl text-primary/90 mb-8" style={{ fontSize: `${customization.fontSize * 0.9}rem`}}>
+            <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0, x: customization.positions.title.x, y: customization.positions.title.y }}
+                exit={{ opacity: 0, y: -20 }}
+                drag
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                onDrag={(e, i) => handleDrag(e, i, 'title')}
+                dragMomentum={false}
+                className="font-bold text-5xl sm:text-6xl md:text-7xl text-primary/90 mb-8 cursor-grab text-center"
+                style={{ fontSize: `${customization.fontSize * 0.9}rem`, cursor: isDragging ? 'grabbing' : 'grab' }}
+            >
               {passage.reference}
-            </h1>
-            <p className="leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap" style={passageStyle}>
+            </motion.h1>
+            <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0, x: customization.positions.text.x, y: customization.positions.text.y }}
+                exit={{ opacity: 0, y: -20 }}
+                drag
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                onDrag={(e, i) => handleDrag(e, i, 'text')}
+                dragMomentum={false}
+                className="leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap cursor-grab"
+                style={{ ...passageStyle, cursor: isDragging ? 'grabbing' : 'grab' }}
+            >
               {passage.text}
-            </p>
+            </motion.p>
           </motion.div>
         ) : (
           <motion.div
