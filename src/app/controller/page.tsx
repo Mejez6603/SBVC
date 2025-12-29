@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { BibleProvider, useBible } from '@/context/bible-context';
@@ -12,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { CustomizationController } from '@/components/customization-controller';
 
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
@@ -101,8 +103,22 @@ function Controller() {
           </div>
         </div>
         <div className="w-[350px] border-l flex flex-col">
-          <PresentationController />
-          <Notepad />
+          <Tabs defaultValue="present" className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 m-2">
+                <TabsTrigger value="present">Present</TabsTrigger>
+                <TabsTrigger value="customize">Customize</TabsTrigger>
+                <TabsTrigger value="ai">AI</TabsTrigger>
+            </TabsList>
+            <TabsContent value="present" className="flex-1 flex flex-col">
+                <PresentationController />
+            </TabsContent>
+            <TabsContent value="customize" className="flex-1 flex flex-col">
+                <CustomizationController />
+            </TabsContent>
+            <TabsContent value="ai" className="flex-1 flex flex-col">
+                <Notepad />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

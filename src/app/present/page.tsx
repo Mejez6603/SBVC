@@ -3,15 +3,31 @@
 
 import { useEffect, useState } from 'react';
 import type { Passage } from '@/context/app-context';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, PanInfo } from 'framer-motion';
 
 const THEME_KEY = 'sbvc-theme';
 const PASSAGE_KEY = 'present-passage';
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
+const CUSTOMIZATION_KEY = 'sbvc-customization';
+
+type Customization = {
+  fontFamily: string;
+  fontSize: number;
+  textAlign: 'left' | 'center' | 'right';
+  position: { x: number, y: number };
+};
 
 export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [customization, setCustomization] = useState<Customization>({
+    fontFamily: 'Inter',
+    fontSize: 5,
+    textAlign: 'center',
+    position: { x: 0, y: 0 },
+  });
+  
+  const [isDragging, setIsDragging] = useState(false);
 
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
@@ -30,6 +46,18 @@ export default function PresentPage() {
       }
     }
   };
+  
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const newPos = {
+        x: customization.position.x + info.delta.x,
+        y: customization.position.y + info.delta.y,
+    };
+    
+    const newCustomization = { ...customization, position: newPos };
+    setCustomization(newCustomization);
+    localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
+  };
+
 
   useEffect(() => {
     const syncStateFromStorage = (key: string | null) => {
@@ -42,6 +70,13 @@ export default function PresentPage() {
         if (key === null || key === PASSAGE_KEY) {
           const savedPassage = localStorage.getItem(PASSAGE_KEY);
           setPassage(savedPassage ? JSON.parse(savedPassage) : null);
+        }
+
+        if (key === null || key === CUSTOMIZATION_KEY) {
+            const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
+            if (savedCustomization) {
+                setCustomization(JSON.parse(savedCustomization));
+            }
         }
       } catch (error) {
         console.error("Failed to parse from local storage:", error);
@@ -83,23 +118,37 @@ export default function PresentPage() {
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
+  
+  const passageStyle = {
+    fontFamily: customization.fontFamily,
+    fontSize: `${customization.fontSize}rem`,
+    textAlign: customization.textAlign,
+  }
 
   return (
-    <main className="flex h-screen w-screen items-center justify-center bg-background p-8 transition-colors duration-300">
+    <main className="flex h-screen w-screen items-center justify-center bg-background p-8 transition-colors duration-300 overflow-hidden">
       <AnimatePresence mode="wait">
         {passage ? (
           <motion.div
             key={passage.reference}
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0, x: customization.position.x, y: customization.position.y }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="text-center"
+            drag
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={() => setIsDragging(false)}
+            onDrag={handleDrag}
+            dragMomentum={false}
+            className="text-center cursor-grab"
+            style={{
+                cursor: isDragging ? 'grabbing' : 'grab'
+            }}
           >
-            <h1 className="font-bold text-5xl sm:text-6xl md:text-7xl text-primary/90 mb-8">
+            <h1 className="font-bold text-5xl sm:text-6xl md:text-7xl text-primary/90 mb-8" style={{ fontSize: `${customization.fontSize * 0.9}rem`}}>
               {passage.reference}
             </h1>
-            <p className="text-3xl sm:text-4xl md:text-5xl leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap">
+            <p className="leading-relaxed text-foreground max-w-7xl mx-auto whitespace-pre-wrap" style={passageStyle}>
               {passage.text}
             </p>
           </motion.div>

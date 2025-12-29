@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Input } from './ui/input';
@@ -42,7 +43,7 @@ export function Notepad() {
 
   return (
     <div className="flex-1 flex flex-col p-4">
-      <div className="font-semibold text-sm mb-2">Notepad & AI Suggestions</div>
+      <div className="font-semibold text-sm mb-2">AI Topic Suggestions</div>
       <div className="relative mb-2">
         <Input 
           placeholder="Enter a topic (e.g., 'love', 'forgiveness')" 
