@@ -3,7 +3,7 @@
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
-import { Loader, Search } from 'lucide-react';
+import { Loader, Search as SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 import { suggestRelevantPassages } from '@/ai/flows/suggest-relevant-passages';
 import { useBible } from '@/context/bible-context';
@@ -41,9 +41,9 @@ export function Notepad() {
   };
 
   return (
-    <div className="flex flex-col p-4 space-y-4">
+    <div className="flex flex-col p-4 space-y-4 h-full">
       <div>
-        <div className="font-semibold text-sm mb-2">AI Topic Suggestions</div>
+        <div className="font-semibold text-sm mb-2">Search</div>
         <div className="relative">
           <Input 
             placeholder="Enter a topic (e.g., 'love', 'forgiveness')" 
@@ -58,7 +58,7 @@ export function Notepad() {
             onClick={handleSearch}
             disabled={isLoading}
           >
-            {isLoading ? <Loader className="animate-spin" /> : <Search />}
+            {isLoading ? <Loader className="animate-spin" /> : <SearchIcon />}
           </Button>
         </div>
       </div>
