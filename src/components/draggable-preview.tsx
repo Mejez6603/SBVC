@@ -14,7 +14,7 @@ type Customization = {
   fontSize: number;
   titleFontFamily: string;
   titleFontSize: number;
-  textAlign: 'left' | 'center' | 'right';
+  textAlign: 'left' | 'center' | 'right' | 'justify';
   positions: {
     title: { x: number; y: number };
     text: { x: number; y: number };

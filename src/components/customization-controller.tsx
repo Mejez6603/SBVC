@@ -6,8 +6,9 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Slider } from './ui/slider';
 import { Button } from './ui/button';
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { RefreshCw } from 'lucide-react';
 
 const CUSTOMIZATION_KEY = 'sbvc-customization';
 
@@ -16,7 +17,7 @@ type Customization = {
   fontSize: number;
   titleFontFamily: string;
   titleFontSize: number;
-  textAlign: 'left' | 'center' | 'right';
+  textAlign: 'left' | 'center' | 'right' | 'justify';
   positions: {
     title: { x: number; y: number };
     text: { x: number; y: number };
@@ -67,6 +68,21 @@ export function CustomizationController() {
       setCustomization(defaultCustomization);
       localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(defaultCustomization));
   }
+
+  const handleResetPosition = () => {
+    const saved = localStorage.getItem(CUSTOMIZATION_KEY);
+    if (saved) {
+        const currentCustomization = JSON.parse(saved);
+        const newCustomization = {
+            ...currentCustomization,
+            positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } }
+        };
+        setCustomization(newCustomization);
+        localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
+    } else {
+        updateCustomization({ positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } } });
+    }
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -139,7 +155,7 @@ export function CustomizationController() {
 
       <div className="space-y-2">
         <Label>Text Alignment</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-2">
           <Button
             variant={customization.textAlign === 'left' ? 'secondary' : 'outline'}
             onClick={() => updateCustomization({ textAlign: 'left' })}
@@ -161,7 +177,24 @@ export function CustomizationController() {
           >
             <AlignRight />
           </Button>
+          <Button
+            variant={customization.textAlign === 'justify' ? 'secondary' : 'outline'}
+            onClick={() => updateCustomization({ textAlign: 'justify' })}
+            size="icon"
+          >
+            <AlignJustify />
+          </Button>
         </div>
+      </div>
+
+      <Separator />
+      
+      <div className="space-y-2">
+        <Label>Position</Label>
+        <Button variant="outline" className="w-full" onClick={handleResetPosition}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Reset Positions
+        </Button>
       </div>
 
       <Separator />
