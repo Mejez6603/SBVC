@@ -16,6 +16,7 @@ type Customization = {
   titleFontFamily: string;
   titleFontSize: number;
   textAlign: 'left' | 'center' | 'right' | 'justify';
+  horizontalPadding: number;
   positions: {
     title: { x: number; y: number };
     text: { x: number; y: number };
@@ -31,6 +32,7 @@ export default function PresentPage() {
     titleFontFamily: 'Inter',
     titleFontSize: 4.5,
     textAlign: 'center',
+    horizontalPadding: 1,
     positions: {
       title: { x: 0, y: 0 },
       text: { x: 0, y: 0 },
@@ -86,6 +88,9 @@ export default function PresentPage() {
                 }
                 if (!parsed.titleFontFamily) {
                     parsed.titleFontFamily = 'Inter';
+                }
+                if (parsed.horizontalPadding === undefined) {
+                    parsed.horizontalPadding = 1;
                 }
                 setCustomization(c => ({...c, ...parsed}));
             }
@@ -166,8 +171,13 @@ export default function PresentPage() {
     textAlign: customization.textAlign,
   }
 
+  const mainStyle = {
+    paddingLeft: `${customization.horizontalPadding}rem`,
+    paddingRight: `${customization.horizontalPadding}rem`,
+  }
+
   return (
-    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background px-2 py-4 transition-colors duration-300 overflow-hidden">
+    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background py-4 transition-colors duration-300 overflow-hidden" style={mainStyle}>
       <AnimatePresence mode="wait">
         {passage ? (
           <motion.div

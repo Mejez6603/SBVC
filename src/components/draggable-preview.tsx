@@ -15,6 +15,7 @@ type Customization = {
   titleFontFamily: string;
   titleFontSize: number;
   textAlign: 'left' | 'center' | 'right' | 'justify';
+  horizontalPadding: number;
   positions: {
     title: { x: number; y: number };
     text: { x: number; y: number };
@@ -33,6 +34,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
     titleFontFamily: 'Inter',
     titleFontSize: 4.5,
     textAlign: 'center',
+    horizontalPadding: 1,
     positions: {
       title: { x: 0, y: 0 },
       text: { x: 0, y: 0 },
@@ -58,6 +60,9 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
                 }
                 if (!parsed.titleFontFamily) {
                     parsed.titleFontFamily = 'Inter';
+                }
+                if (parsed.horizontalPadding === undefined) {
+                    parsed.horizontalPadding = 1;
                 }
                 setCustomization(c => ({...c, ...parsed}));
             } catch (e) {
@@ -112,11 +117,17 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
     textAlign: customization.textAlign
   }
 
+  const containerStyle = {
+    paddingLeft: `${customization.horizontalPadding * previewScale}rem`,
+    paddingRight: `${customization.horizontalPadding * previewScale}rem`,
+  }
+
   return (
     <div 
         ref={setContainerRef}
+        style={containerStyle}
         className={cn(
-            "aspect-video w-full rounded-md p-2 relative overflow-hidden flex flex-col items-center justify-center",
+            "aspect-video w-full rounded-md relative overflow-hidden flex flex-col items-center justify-center",
             theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'
         )}
     >

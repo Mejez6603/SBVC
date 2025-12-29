@@ -18,6 +18,7 @@ type Customization = {
   titleFontFamily: string;
   titleFontSize: number;
   textAlign: 'left' | 'center' | 'right' | 'justify';
+  horizontalPadding: number;
   positions: {
     title: { x: number; y: number };
     text: { x: number; y: number };
@@ -30,6 +31,7 @@ const defaultCustomization: Customization = {
     titleFontFamily: 'Inter',
     titleFontSize: 4.5,
     textAlign: 'center',
+    horizontalPadding: 1,
     positions: { 
         title: { x: 0, y: 0 },
         text: { x: 0, y: 0 } 
@@ -53,6 +55,9 @@ export function CustomizationController() {
       }
       if (!parsed.titleFontFamily) {
         parsed.titleFontFamily = 'Inter';
+      }
+      if (parsed.horizontalPadding === undefined) {
+        parsed.horizontalPadding = 1;
       }
       setCustomization(p => ({...p, ...parsed}));
     }
@@ -184,6 +189,23 @@ export function CustomizationController() {
           >
             <AlignJustify />
           </Button>
+        </div>
+      </div>
+      
+      <Separator />
+
+      <div className="space-y-2">
+        <div className="font-semibold text-sm">Layout</div>
+        <div className="space-y-4">
+            <Label htmlFor="horizontal-padding">Horizontal Padding ({customization.horizontalPadding}rem)</Label>
+            <Slider
+              id="horizontal-padding"
+              min={0}
+              max={10}
+              step={0.5}
+              value={[customization.horizontalPadding]}
+              onValueChange={(value) => updateCustomization({ horizontalPadding: value[0] })}
+            />
         </div>
       </div>
 
