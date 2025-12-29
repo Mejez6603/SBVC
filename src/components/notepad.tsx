@@ -49,6 +49,14 @@ export function Notepad() {
     }
   };
 
+  const getHighlightedText = (text: string, highlight: string) => {
+    if (!highlight.trim()) {
+      return text;
+    }
+    const regex = new RegExp(`(${highlight})`, 'gi');
+    return text.replace(regex, `<mark class="bg-yellow-300 text-black rounded px-1">$1</mark>`);
+  };
+
   return (
     <div className="flex flex-col p-4 space-y-4 h-full">
       <div>
@@ -92,7 +100,10 @@ export function Notepad() {
                 onClick={() => handleSuggestionClick(suggestion.reference)}
               >
                 <div className="font-bold">{suggestion.reference}</div>
-                <div className="text-muted-foreground">{suggestion.text}</div>
+                <div 
+                  className="text-muted-foreground"
+                  dangerouslySetInnerHTML={{ __html: getHighlightedText(suggestion.text, topic) }}
+                />
               </button>
             ))}
           </div>
