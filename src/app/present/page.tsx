@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import type { Passage } from '@/context/app-context';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, PanInfo } from 'framer-motion';
 
 const THEME_KEY = 'sbvc-theme';
 const PASSAGE_KEY = 'present-passage';
@@ -60,6 +60,17 @@ export default function PresentPage() {
         }
       }
     }
+  };
+
+  const handleDrag = (info: PanInfo, type: 'title' | 'text') => {
+    const newPositions = { ...customization.positions };
+    newPositions[type] = {
+      x: customization.positions[type].x + info.delta.x,
+      y: customization.positions[type].y + info.delta.y,
+    };
+    const newCustomization = { ...customization, positions: newPositions };
+    setCustomization(newCustomization);
+    localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
   };
 
   useEffect(() => {
@@ -146,17 +157,20 @@ export default function PresentPage() {
             const contentWrapper = contentWrapperRef.current;
             const container = containerRef.current;
 
-            const checkOverflow = () => {
-                return contentWrapper.scrollHeight > container.clientHeight;
-            }
-
-            // Temporarily set a large font size to establish a baseline
+            // Apply the current font size to measure
             contentWrapper.style.fontSize = `${currentFontSize}rem`;
 
+            const checkOverflow = () => {
+                // Ensure textRef has settled before measuring
+                return textRef.current!.scrollHeight > container.clientHeight - contentWrapper.offsetTop;
+            }
+            
+            // Iteratively reduce font size until it fits
             while(checkOverflow() && currentFontSize > 0.5) {
                 currentFontSize -= 0.1;
                 contentWrapper.style.fontSize = `${currentFontSize}rem`;
             }
+
             setAdjustedFontSize(currentFontSize);
         } else {
             setAdjustedFontSize(customization.fontSize);
@@ -169,7 +183,7 @@ export default function PresentPage() {
     window.addEventListener('resize', adjustFontSize);
     return () => window.removeEventListener('resize', adjustFontSize);
 
-}, [passage, customization, containerRef, contentWrapperRef]);
+}, [passage, customization, containerRef, contentWrapperRef, textRef]);
 
 
   const passageStyle = {
@@ -193,7 +207,7 @@ export default function PresentPage() {
   }
 
   return (
-    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background py-4 transition-colors duration-300 overflow-hidden" style={mainStyle}>
+    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background py-4 transition-colors duration-300 overflow-hidden cursor-grab" style={mainStyle}>
       <AnimatePresence mode="wait">
         {passage ? (
           <motion.div
@@ -207,20 +221,26 @@ export default function PresentPage() {
             style={contentWrapperStyle}
           >
             <motion.h1 
+                drag
+                dragMomentum={false}
+                onDrag={(e, i) => handleDrag(i, 'title')}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, x: customization.positions.title.x, y: customization.positions.title.y }}
                 exit={{ opacity: 0, y: -20 }}
-                className="font-bold text-primary/90 mb-2"
+                className="font-bold text-primary/90 mb-2 cursor-grab active:cursor-grabbing"
                 style={titleStyle}
             >
               {passage.reference}
             </motion.h1>
             <motion.p
                 ref={textRef}
+                drag
+                dragMomentum={false}
+                onDrag={(e, i) => handleDrag(i, 'text')}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, x: customization.positions.text.x, y: customization.positions.text.y }}
                 exit={{ opacity: 0, y: -20 }}
-                className="leading-relaxed text-foreground max-w-full whitespace-pre-wrap"
+                className="leading-relaxed text-foreground max-w-full whitespace-pre-wrap cursor-grab active:cursor-grabbing"
                 style={passageStyle}
             >
               {passage.text}
