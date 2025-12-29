@@ -2,15 +2,13 @@
 
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { ScrollArea } from './ui/scroll-area';
 import { Loader, Search as SearchIcon } from 'lucide-react';
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { searchBible } from '@/ai/flows/search-bible';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
 import { tagalogToEnglishBookMap } from '@/lib/bible';
-import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
@@ -25,15 +23,8 @@ type SearchResults = {
   tcb: Suggestion[];
 }
 
-function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight, virtualizer }: { virtualItem: any, suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string, virtualizer: any }) {
-    const nodeRef = useRef<HTMLButtonElement>(null);
+function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight }: { virtualItem: any, suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string }) {
     const suggestion = suggestions[virtualItem.index];
-
-    useEffect(() => {
-        if (nodeRef.current) {
-            virtualizer.measureElement(nodeRef.current);
-        }
-    }, [nodeRef, virtualizer]);
 
     const getHighlightedText = (text: string | undefined, highlight: string) => {
         if (!highlight.trim() || !text) {
@@ -44,9 +35,7 @@ function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight, vir
     };
 
     return (
-        <button
-            key={virtualItem.key}
-            ref={nodeRef}
+        <div
             style={{
                 position: 'absolute',
                 top: 0,
@@ -54,19 +43,22 @@ function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight, vir
                 width: '100%',
                 transform: `translateY(${virtualItem.start}px)`,
             }}
-            className="w-full text-left p-2 hover:bg-accent text-xs border-b"
-            onClick={() => onSuggestionClick(suggestion.reference)}
         >
-            <div className="font-bold">{suggestion.reference}</div>
-            {suggestion.text ? (
-                <div
-                    className="text-muted-foreground whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
-                />
-            ) : (
-                <div className="text-muted-foreground italic">Verse not available in this version.</div>
-            )}
-        </button>
+            <button
+                className="w-full text-left p-2 hover:bg-accent text-xs border-b"
+                onClick={() => onSuggestionClick(suggestion.reference)}
+            >
+                <div className="font-bold">{suggestion.reference}</div>
+                {suggestion.text ? (
+                    <div
+                        className="text-muted-foreground whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
+                    />
+                ) : (
+                    <div className="text-muted-foreground italic">Verse not available in this version.</div>
+                )}
+            </button>
+        </div>
     );
 }
 
@@ -76,15 +68,11 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     const rowVirtualizer = useVirtualizer({
         count: suggestions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 70, // A reasonable estimate
+        estimateSize: () => 70,
         overscan: 5,
     });
     
     const virtualItems = rowVirtualizer.getVirtualItems();
-
-    useEffect(() => {
-        rowVirtualizer.measure();
-    }, [suggestions, rowVirtualizer]);
 
     if (suggestions.length === 0) {
       return (
@@ -95,7 +83,7 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     }
     
     return (
-        <div ref={parentRef} className="h-full w-full overflow-auto border rounded-md bg-background">
+        <div ref={parentRef} className="h-full w-full overflow-auto relative border rounded-md bg-background">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -104,14 +92,41 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
             }}
           >
             {virtualItems.map((virtualItem) => (
-                <ResultRow
+                <div
                     key={virtualItem.key}
-                    virtualItem={virtualItem}
-                    suggestions={suggestions}
-                    onSuggestionClick={onSuggestionClick}
-                    highlight={highlight}
-                    virtualizer={rowVirtualizer}
-                />
+                    data-index={virtualItem.index}
+                    ref={rowVirtualizer.measureElement}
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                >
+                    <button
+                        className="w-full text-left p-2 hover:bg-accent text-xs border-b"
+                        onClick={() => onSuggestionClick(suggestions[virtualItem.index].reference)}
+                    >
+                        <div className="font-bold">{suggestions[virtualItem.index].reference}</div>
+                        {suggestions[virtualItem.index].text ? (
+                            <div
+                                className="text-muted-foreground whitespace-pre-wrap"
+                                dangerouslySetInnerHTML={(() => {
+                                    const text = suggestions[virtualItem.index].text;
+                                    const term = highlight;
+                                    if (!term.trim() || !text) {
+                                      return { __html: text || '' };
+                                    }
+                                    const regex = new RegExp(`(${term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+                                    return { __html: text.replace(regex, `<mark class="bg-yellow-300 text-black rounded px-1">$1</mark>`) };
+                                })()}
+                            />
+                        ) : (
+                            <div className="text-muted-foreground italic">Verse not available in this version.</div>
+                        )}
+                    </button>
+                </div>
             ))}
           </div>
         </div>
