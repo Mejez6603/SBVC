@@ -1,6 +1,5 @@
 
 import { NavigationMenu } from '@/components/navigation-menu';
-import { CodeBlock } from '@/components/code-block';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AboutPage() {
@@ -21,26 +20,22 @@ export default function AboutPage() {
                     <CardTitle>Getting Started</CardTitle>
                     <CardDescription>Follow these steps to get a local copy up and running.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4">
                      <div>
-                        <h3 className="font-semibold mb-2">1. Clone the repository</h3>
-                        <p className="text-sm text-muted-foreground mb-2">First, you need to clone the project from GitHub.</p>
-                        <CodeBlock command="git clone https://github.com/Mejez6603/SBVC.git" />
+                        <h3 className="font-semibold">1. Clone the repository</h3>
+                        <p className="text-sm text-muted-foreground">`git clone https://github.com/Mejez6603/SBVC.git`</p>
                     </div>
                      <div>
-                        <h3 className="font-semibold mb-2">2. Navigate to the project directory</h3>
-                        <p className="text-sm text-muted-foreground mb-2">Once cloned, move into the project folder.</p>
-                        <CodeBlock command="cd SBVC" />
+                        <h3 className="font-semibold">2. Navigate to the project directory</h3>
+                        <p className="text-sm text-muted-foreground">`cd SBVC`</p>
                     </div>
                      <div>
-                        <h3 className="font-semibold mb-2">3. Install dependencies</h3>
-                        <p className="text-sm text-muted-foreground mb-2">Install all the required packages using npm.</p>
-                        <CodeBlock command="npm install" />
+                        <h3 className="font-semibold">3. Install dependencies</h3>
+                        <p className="text-sm text-muted-foreground">`npm install`</p>
                     </div>
                     <div>
-                        <h3 className="font-semibold mb-2">4. Run the development server</h3>
-                        <p className="text-sm text-muted-foreground mb-2">Start the local server to see the application in action.</p>
-                        <CodeBlock command="npm run dev" />
+                        <h3 className="font-semibold">4. Run the development server</h3>
+                        <p className="text-sm text-muted-foreground">`npm run dev`</p>
                     </div>
                 </CardContent>
             </Card>
