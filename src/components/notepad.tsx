@@ -4,7 +4,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Loader, Search as SearchIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { searchBible } from '@/ai/flows/search-bible';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
@@ -12,6 +12,7 @@ import { Separator } from './ui/separator';
 import { tagalogToEnglishBookMap } from '@/lib/bible';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 type Suggestion = {
     reference: string;
@@ -22,6 +23,74 @@ type SearchResults = {
   kjv: Suggestion[];
   adb: Suggestion[];
   tcb: Suggestion[];
+}
+
+function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string }) {
+    const parentRef = useRef<HTMLDivElement>(null);
+
+    const getHighlightedText = (text: string | undefined, highlight: string) => {
+        if (!highlight.trim() || !text) {
+          return { __html: text || '' };
+        }
+        const regex = new RegExp(`(${highlight.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+        return { __html: text.replace(regex, `<mark class="bg-yellow-300 text-black rounded px-1">$1</mark>`) };
+    };
+
+    const rowVirtualizer = useVirtualizer({
+        count: suggestions.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 56, // Estimate size of each row
+        overscan: 5,
+    });
+
+    if (suggestions.length === 0) {
+      return (
+        <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
+          No results found for this version.
+        </div>
+      );
+    }
+    
+    return (
+        <div ref={parentRef} className="h-full w-full overflow-auto border rounded-md bg-background">
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+              const suggestion = suggestions[virtualItem.index];
+              return (
+                <button
+                  key={virtualItem.key}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                  className="w-full text-left p-2 hover:bg-accent text-xs"
+                  onClick={() => onSuggestionClick(suggestion.reference)}
+                >
+                  <div className="font-bold">{suggestion.reference}</div>
+                  {suggestion.text ? (
+                    <div
+                      className="text-muted-foreground truncate"
+                      dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
+                    />
+                  ) : (
+                    <div className="text-muted-foreground italic">Verse not available in this version.</div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+    );
 }
 
 export function Notepad() {
@@ -61,47 +130,10 @@ export function Notepad() {
     }
   };
 
-  const getHighlightedText = (text: string | undefined, highlight: string) => {
-    if (!highlight.trim() || !text) {
-      return text || '';
-    }
-    const regex = new RegExp(`(${highlight.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, `<mark class="bg-yellow-300 text-black rounded px-1">$1</mark>`);
-  };
-
   const totalResults = results.kjv.length;
 
   const renderResults = (suggestions: Suggestion[]) => {
-    if (suggestions.length === 0) {
-      return (
-        <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
-          No results found for this version.
-        </div>
-      );
-    }
-    return (
-      <ScrollArea className="h-full border rounded-md bg-background">
-        <div className="p-2">
-          {suggestions.map((suggestion, index) => (
-            <button 
-              key={index} 
-              className="w-full text-left p-2 rounded-md hover:bg-accent text-xs"
-              onClick={() => handleSuggestionClick(suggestion.reference)}
-            >
-              <div className="font-bold">{suggestion.reference}</div>
-              {suggestion.text ? (
-                <div 
-                  className="text-muted-foreground"
-                  dangerouslySetInnerHTML={{ __html: getHighlightedText(suggestion.text, topic) }}
-                />
-              ) : (
-                <div className="text-muted-foreground italic">Verse not available in this version.</div>
-              )}
-            </button>
-          ))}
-        </div>
-      </ScrollArea>
-    );
+    return <ResultList suggestions={suggestions} onSuggestionClick={handleSuggestionClick} highlight={topic} />;
   };
 
   return (
