@@ -29,10 +29,10 @@ export function Notepad() {
   };
   
   const handleSuggestionClick = (passage: string) => {
-    // Example: "John 3:16"
-    const match = passage.match(/(\d?\s?[a-zA-Z]+)\s(\d+):(\d+)/);
+    // Example: "John 3:16" or "1 John 3:16"
+    const match = passage.match(/(\d?\s?[a-zA-Z\s]+)\s(\d+):(\d+)/);
     if (match) {
-        const [, book, chapter, verse] = match;
+        const [, book, chapter] = match;
         const bookName = book.trim();
         const chapterNum = parseInt(chapter, 10);
         
@@ -42,30 +42,33 @@ export function Notepad() {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4">
-      <div className="font-semibold text-sm mb-2">AI Topic Suggestions</div>
-      <div className="relative mb-2">
-        <Input 
-          placeholder="Enter a topic (e.g., 'love', 'forgiveness')" 
-          className="pr-20"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-        <Button 
-          size="sm" 
-          className="absolute right-1 top-1/2 -translate-y-1/2"
-          onClick={handleSearch}
-          disabled={isLoading}
-        >
-          {isLoading ? <Loader className="animate-spin" /> : <Search />}
-        </Button>
+    <div className="flex-1 flex flex-col p-4 space-y-4">
+      <div>
+        <div className="font-semibold text-sm mb-2">AI Topic Suggestions</div>
+        <div className="relative">
+          <Input 
+            placeholder="Enter a topic (e.g., 'love', 'forgiveness')" 
+            className="pr-20"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <Button 
+            size="sm" 
+            className="absolute right-1 top-1/2 -translate-y-1/2"
+            onClick={handleSearch}
+            disabled={isLoading}
+          >
+            {isLoading ? <Loader className="animate-spin" /> : <Search />}
+          </Button>
+        </div>
       </div>
-      <ScrollArea className="flex-1 mt-2 border rounded-md">
+      
+      <ScrollArea className="flex-1 border rounded-md bg-background">
         {isLoading ? (
             <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center">
-                <Loader className="animate-spin mr-2" />
-                Getting suggestions...
+                <Loader className="animate-spin mr-2 h-4 w-4" />
+                <span>Getting suggestions...</span>
             </div>
         ) : suggestions.length > 0 ? (
           <div className="p-2">
@@ -80,8 +83,8 @@ export function Notepad() {
             ))}
           </div>
         ) : (
-          <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center">
-            Enter a topic to get related Bible passages.
+          <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
+            Enter a topic above to get related Bible passages.
           </div>
         )}
       </ScrollArea>
