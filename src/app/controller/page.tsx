@@ -127,7 +127,9 @@ function Controller() {
                 </ScrollArea>
             </TabsContent>
             <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 data-[state=inactive]:hidden">
-                <Notepad />
+                <ScrollArea className="h-full">
+                    <Notepad />
+                </ScrollArea>
             </TabsContent>
           </Tabs>
         </div>

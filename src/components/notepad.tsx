@@ -7,6 +7,8 @@ import { Loader, Search as SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 import { suggestRelevantPassages } from '@/ai/flows/suggest-relevant-passages';
 import { useBible } from '@/context/bible-context';
+import { Textarea } from './ui/textarea';
+import { Separator } from './ui/separator';
 
 export function Notepad() {
   const [topic, setTopic] = useState('');
@@ -63,7 +65,7 @@ export function Notepad() {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 border rounded-md bg-background min-h-[200px]">
+      <ScrollArea className="flex-1 border rounded-md bg-background min-h-[250px]">
         {isLoading ? (
             <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center">
                 <Loader className="animate-spin mr-2 h-4 w-4" />
@@ -87,6 +89,14 @@ export function Notepad() {
           </div>
         )}
       </ScrollArea>
+      
+      <Separator />
+
+      <div className="flex flex-col space-y-2 flex-1 min-h-[200px]">
+        <div className="font-semibold text-sm">Notepad</div>
+        <Textarea className="flex-1" placeholder="Take notes here..." />
+      </div>
+
     </div>
   );
 }
