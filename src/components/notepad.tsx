@@ -70,6 +70,11 @@ export function Notepad() {
             {isLoading ? <Loader className="animate-spin" /> : <SearchIcon />}
           </Button>
         </div>
+        {suggestions.length > 0 && !isLoading && (
+            <p className="text-xs text-muted-foreground mt-2">
+                Found {suggestions.length} results.
+            </p>
+        )}
       </div>
       
       <ScrollArea className="flex-1 border rounded-md bg-background min-h-[250px]">

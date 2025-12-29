@@ -33,7 +33,7 @@ const prompt = ai.definePrompt({
   name: 'suggestRelevantPassagesPrompt',
   input: {schema: SuggestRelevantPassagesInputSchema},
   output: {schema: SuggestRelevantPassagesOutputSchema},
-  prompt: `You are a knowledgeable guide to the Bible. A user is interested in the topic "{{{topic}}}". Suggest several relevant Bible passages. For each passage, provide both the reference and the full text of the verse(s). Return the list of passages as a JSON array of objects, where each object has a "reference" and a "text" field. Focus on direct quotations. Omit commentary.`,
+  prompt: `You are a knowledgeable guide to the Bible. A user is interested in the topic "{{{topic}}}". Suggest 8 to 10 relevant Bible passages. For each passage, provide both the reference and the full text of the verse(s). Return the list of passages as a JSON array of objects, where each object has a "reference" and a "text" field. Focus on direct quotations. Omit commentary.`,
 });
 
 const suggestRelevantPassagesFlow = ai.defineFlow(
