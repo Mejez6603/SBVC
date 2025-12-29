@@ -25,8 +25,15 @@ type SearchResults = {
   tcb: Suggestion[];
 }
 
-function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string }) {
-    const parentRef = useRef<HTMLDivElement>(null);
+function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight, virtualizer }: { virtualItem: any, suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string, virtualizer: any }) {
+    const nodeRef = useRef<HTMLButtonElement>(null);
+    const suggestion = suggestions[virtualItem.index];
+
+    useEffect(() => {
+        if (nodeRef.current) {
+            virtualizer.measureElement(nodeRef.current);
+        }
+    }, [nodeRef, virtualizer]);
 
     const getHighlightedText = (text: string | undefined, highlight: string) => {
         if (!highlight.trim() || !text) {
@@ -36,24 +43,46 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
         return { __html: text.replace(regex, `<mark class="bg-yellow-300 text-black rounded px-1">$1</mark>`) };
     };
 
+    return (
+        <button
+            key={virtualItem.key}
+            ref={nodeRef}
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${virtualItem.start}px)`,
+            }}
+            className="w-full text-left p-2 hover:bg-accent text-xs border-b"
+            onClick={() => onSuggestionClick(suggestion.reference)}
+        >
+            <div className="font-bold">{suggestion.reference}</div>
+            {suggestion.text ? (
+                <div
+                    className="text-muted-foreground whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
+                />
+            ) : (
+                <div className="text-muted-foreground italic">Verse not available in this version.</div>
+            )}
+        </button>
+    );
+}
+
+function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string }) {
+    const parentRef = useRef<HTMLDivElement>(null);
+
     const rowVirtualizer = useVirtualizer({
         count: suggestions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: (index) => {
-          const suggestion = suggestions[index];
-          // A rough estimate based on text length. Adjust multiplier as needed.
-          const baseHeight = 50; 
-          const textHeight = suggestion.text ? Math.ceil(suggestion.text.length / 50) * 20 : 0;
-          return baseHeight + textHeight;
-        }, 
+        estimateSize: () => 70, // A reasonable estimate
         overscan: 5,
     });
     
     const virtualItems = rowVirtualizer.getVirtualItems();
 
     useEffect(() => {
-        // This is a workaround to force re-measurement when tabs change
-        // as the virtualizer might not be aware of the new scroll container.
         rowVirtualizer.measure();
     }, [suggestions, rowVirtualizer]);
 
@@ -74,42 +103,16 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
               position: 'relative',
             }}
           >
-            {virtualItems.map((virtualItem) => {
-              const suggestion = suggestions[virtualItem.index];
-              const nodeRef = useRef<HTMLButtonElement>(null);
-
-              useEffect(() => {
-                if (nodeRef.current) {
-                    rowVirtualizer.measureElement(nodeRef.current)
-                }
-              }, [nodeRef, rowVirtualizer]);
-
-              return (
-                <button
-                  key={virtualItem.key}
-                  ref={nodeRef}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                  className="w-full text-left p-2 hover:bg-accent text-xs border-b"
-                  onClick={() => onSuggestionClick(suggestion.reference)}
-                >
-                  <div className="font-bold">{suggestion.reference}</div>
-                  {suggestion.text ? (
-                    <div
-                      className="text-muted-foreground whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
-                    />
-                  ) : (
-                    <div className="text-muted-foreground italic">Verse not available in this version.</div>
-                  )}
-                </button>
-              );
-            })}
+            {virtualItems.map((virtualItem) => (
+                <ResultRow
+                    key={virtualItem.key}
+                    virtualItem={virtualItem}
+                    suggestions={suggestions}
+                    onSuggestionClick={onSuggestionClick}
+                    highlight={highlight}
+                    virtualizer={rowVirtualizer}
+                />
+            ))}
           </div>
         </div>
     );
