@@ -27,73 +27,55 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const [selectedBook, setSelectedBook] = useState('Genesis');
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [selectedVerse, setInternalSelectedVerse] = useState<number | null>(null);
-  const [selectedVerseText, setSelectedVerseText] = useState<string>('');
   const [selectedVersion, setSelectedVersion] = useState<BibleVersion>('KJV');
   const [selectedTagalogVersion, setSelectedTagalogVersion] = useState<'ADB' | 'TCB'>('ADB');
   const [selectedEnglishVersion, setSelectedEnglishVersion] = useState<'KJV'>('KJV');
   
-  // State for what is actually on the presentation screen
-  const [presentedBook, setPresentedBook] = useState('Genesis');
-  const [presentedChapter, setPresentedChapter] = useState(1);
-  const [presentedVerse, setPresentedVerse] = useState<number | null>(null);
-  const [presentedVerseText, setPresentedVerseText] = useState('');
-
   const { setPassage } = useAppContext();
-
-  useEffect(() => {
-    const updatePresentation = (passage: Passage) => {
-      setPassage(passage);
-      try {
-        if (passage) {
-          localStorage.setItem('present-passage', JSON.stringify(passage));
-        } else {
-          localStorage.removeItem('present-passage');
-        }
-      } catch (error) {
-        console.error('Could not access local storage:', error);
-      }
-    };
-
-    if (presentedVerse !== null && presentedBook && presentedChapter && presentedVerseText) {
-      const newPassage: Passage = {
-        reference: `${presentedBook} ${presentedChapter}:${presentedVerse}`,
-        text: presentedVerseText,
-      };
-      updatePresentation(newPassage);
-    } else {
-        updatePresentation(null);
-    }
-  }, [presentedVerse, presentedBook, presentedChapter, presentedVerseText, setPassage]);
 
   const handleSetSelectedBook = (book: string) => {
     setSelectedBook(book);
     setSelectedChapter(1);
     setInternalSelectedVerse(null); // Clear verse selection when changing book
+    setPassage(null);
   };
 
   const handleSetSelectedChapter = (chapter: number) => {
     setSelectedChapter(chapter);
     setInternalSelectedVerse(null); // Clear verse selection when changing chapter
+    setPassage(null);
   };
 
   const setSelectedVerse = (verse: number | null, version: BibleVersion, text: string) => {
+    let newPassage: Passage = null;
+    
     if (verse === selectedVerse && version === selectedVersion) {
         // If clicking the same verse again, clear the selection and presentation
         setInternalSelectedVerse(null);
-        setSelectedVerseText('');
-        setPresentedVerse(null);
-        setPresentedVerseText('');
+        newPassage = null;
     } else {
         // Update the selection in the controller
         setInternalSelectedVerse(verse);
         setSelectedVersion(version);
-        setSelectedVerseText(text);
 
-        // Explicitly update what's being presented
-        setPresentedBook(selectedBook);
-        setPresentedChapter(selectedChapter);
-        setPresentedVerse(verse);
-        setPresentedVerseText(text);
+        if (verse !== null) {
+            newPassage = {
+                reference: `${selectedBook} ${selectedChapter}:${verse}`,
+                text: text,
+            };
+        }
+    }
+
+    // Update the global passage state for presentation and preview
+    setPassage(newPassage);
+    try {
+        if (newPassage) {
+          localStorage.setItem('present-passage', JSON.stringify(newPassage));
+        } else {
+          localStorage.removeItem('present-passage');
+        }
+    } catch (error) {
+        console.error('Could not access local storage:', error);
     }
   }
 
