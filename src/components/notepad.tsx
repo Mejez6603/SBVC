@@ -3,7 +3,7 @@
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Loader, Search as SearchIcon } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { searchBible } from '@/ai/flows/search-bible';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
@@ -38,7 +38,6 @@ function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight }: {
     return (
         <div
             key={virtualItem.key}
-            data-index={virtualItem.index}
             style={{
                 position: 'absolute',
                 top: 0,
@@ -72,12 +71,11 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
         count: suggestions.length,
         getScrollElement: () => parentRef.current,
         estimateSize: (index) => {
-            const text = suggestions[index].text || '';
+            const text = suggestions[index]?.text || '';
             const lineBreaks = (text.match(/\n/g) || []).length;
-            // Estimate height based on ~50 chars per line, plus reference, plus padding
-            const baseHeight = 38; 
-            const textHeight = (Math.floor(text.length / 50) + lineBreaks) * 15;
-            return baseHeight + textHeight;
+            const baseHeight = 40; // Base height for reference
+            const textHeight = Math.ceil(text.length / 50) * 15; // Estimate height based on text length
+            return baseHeight + textHeight + lineBreaks * 15;
         },
         overscan: 5,
     });
@@ -93,7 +91,7 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     }
     
     return (
-        <ScrollArea ref={parentRef} className="h-full w-full border rounded-md bg-background">
+        <ScrollArea ref={parentRef} className="h-full w-full relative border rounded-md bg-background">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -102,7 +100,7 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
             }}
           >
             {virtualItems.map((virtualItem) => (
-                <ResultRow
+                <ResultRow 
                     key={virtualItem.key}
                     virtualItem={virtualItem}
                     suggestions={suggestions}
@@ -186,7 +184,7 @@ export function Notepad() {
         )}
       </div>
       
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="h-[300px] flex flex-col min-h-0">
           {isLoading ? (
               <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center flex-1">
                   <Loader className="animate-spin mr-2 h-4 w-4" />
@@ -212,9 +210,9 @@ export function Notepad() {
       
       <Separator />
 
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 flex-1 min-h-0">
         <div className="font-semibold text-sm">Notepad</div>
-        <Textarea className="min-h-[100px]" placeholder="Take notes here..." />
+        <Textarea className="min-h-0 flex-1" placeholder="Take notes here..." />
       </div>
 
     </div>
