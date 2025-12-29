@@ -109,10 +109,12 @@ function Controller() {
                 <TabsTrigger value="main">Controls</TabsTrigger>
                 <TabsTrigger value="ai">AI</TabsTrigger>
             </TabsList>
-            <TabsContent value="main" className="flex-1 flex flex-col overflow-y-auto">
-                <PresentationController />
-                <Separator className="my-4" />
-                <CustomizationController />
+            <TabsContent value="main" className="flex-1 flex flex-col min-h-0">
+                <ScrollArea>
+                    <PresentationController />
+                    <Separator className="my-4" />
+                    <CustomizationController />
+                </ScrollArea>
             </TabsContent>
             <TabsContent value="ai" className="flex-1 flex flex-col">
                 <Notepad />
