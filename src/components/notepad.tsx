@@ -11,21 +11,26 @@ import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
 import { tagalogToEnglishBookMap } from '@/lib/bible';
 
+type Suggestion = {
+    reference: string;
+    text: string;
+};
+
 export function Notepad() {
   const [topic, setTopic] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { setSelectedBook, setSelectedChapter } = useBible();
 
   const handleSearch = async () => {
     if (!topic) return;
     setIsLoading(true);
+    setSuggestions([]);
     try {
       const result = await suggestRelevantPassages({ topic });
       setSuggestions(result.passages);
     } catch (error) {
       console.error('Failed to get suggestions:', error);
-      setSuggestions(['Failed to load suggestions.']);
     }
     setIsLoading(false);
   };
@@ -79,9 +84,10 @@ export function Notepad() {
               <button 
                 key={index} 
                 className="w-full text-left p-2 rounded-md hover:bg-accent text-xs"
-                onClick={() => handleSuggestionClick(suggestion)}
+                onClick={() => handleSuggestionClick(suggestion.reference)}
               >
-                {suggestion}
+                <div className="font-bold">{suggestion.reference}</div>
+                <div className="text-muted-foreground">{suggestion.text}</div>
               </button>
             ))}
           </div>

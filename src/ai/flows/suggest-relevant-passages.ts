@@ -15,8 +15,13 @@ const SuggestRelevantPassagesInputSchema = z.object({
 });
 export type SuggestRelevantPassagesInput = z.infer<typeof SuggestRelevantPassagesInputSchema>;
 
+const PassageSchema = z.object({
+    reference: z.string().describe('The Bible passage reference (e.g., "John 3:16").'),
+    text: z.string().describe('The full text of the Bible passage.'),
+});
+
 const SuggestRelevantPassagesOutputSchema = z.object({
-  passages: z.array(z.string()).describe('An array of suggested Bible passages related to the topic.'),
+  passages: z.array(PassageSchema).describe('An array of suggested Bible passages related to the topic, including reference and text.'),
 });
 export type SuggestRelevantPassagesOutput = z.infer<typeof SuggestRelevantPassagesOutputSchema>;
 
@@ -28,7 +33,7 @@ const prompt = ai.definePrompt({
   name: 'suggestRelevantPassagesPrompt',
   input: {schema: SuggestRelevantPassagesInputSchema},
   output: {schema: SuggestRelevantPassagesOutputSchema},
-  prompt: `You are a knowledgeable guide to the Bible. A user is interested in the topic "{{{topic}}}". Suggest several relevant Bible passages. Return the list of passages as a JSON array of strings. Focus on direct quotations or short summaries of passages. Omit commentary.`,
+  prompt: `You are a knowledgeable guide to the Bible. A user is interested in the topic "{{{topic}}}". Suggest several relevant Bible passages. For each passage, provide both the reference and the full text of the verse(s). Return the list of passages as a JSON array of objects, where each object has a "reference" and a "text" field. Focus on direct quotations. Omit commentary.`,
 });
 
 const suggestRelevantPassagesFlow = ai.defineFlow(
