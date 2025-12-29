@@ -151,7 +151,7 @@ export default function PresentPage() {
     } else {
         setAdjustedFontSize(customization.fontSize);
     }
-}, [passage, customization.fontSize, customization.fontFamily]);
+}, [passage, customization.fontSize, customization.fontFamily, customization.textAlign, containerRef.current?.clientWidth, containerRef.current?.clientHeight]);
 
 
   const passageStyle = {
@@ -167,7 +167,7 @@ export default function PresentPage() {
   }
 
   return (
-    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background p-4 transition-colors duration-300 overflow-hidden">
+    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background px-2 py-4 transition-colors duration-300 overflow-hidden">
       <AnimatePresence mode="wait">
         {passage ? (
           <motion.div
@@ -179,24 +179,20 @@ export default function PresentPage() {
             className="w-full h-full flex flex-col items-center justify-center"
           >
             <motion.h1 
-                drag
-                dragMomentum={false}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, x: customization.positions.title.x, y: customization.positions.title.y }}
                 exit={{ opacity: 0, y: -20 }}
-                className="font-bold text-primary/90 mb-4"
+                className="font-bold text-primary/90 mb-2"
                 style={titleStyle}
             >
               {passage.reference}
             </motion.h1>
             <motion.p
                 ref={textRef}
-                drag
-                dragMomentum={false}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, x: customization.positions.text.x, y: customization.positions.text.y }}
                 exit={{ opacity: 0, y: -20 }}
-                className="leading-relaxed text-foreground max-w-7xl whitespace-pre-wrap"
+                className="leading-relaxed text-foreground max-w-full whitespace-pre-wrap"
                 style={passageStyle}
             >
               {passage.text}
