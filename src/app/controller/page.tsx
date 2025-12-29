@@ -102,7 +102,7 @@ function Controller() {
           </div>
         </div>
         <div className="w-[350px] border-l flex flex-col">
-          <Tabs defaultValue="main" className="flex-1 flex flex-col">
+          <Tabs defaultValue="main" className="flex-1 flex flex-col min-h-0">
             <TabsList className="grid w-full grid-cols-2 m-2">
                 <TabsTrigger value="main">Controls</TabsTrigger>
                 <TabsTrigger value="ai">AI</TabsTrigger>
