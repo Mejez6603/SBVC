@@ -74,7 +74,8 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
         estimateSize: (index) => {
             const text = suggestions[index].text || '';
             const lineBreaks = (text.match(/\n/g) || []).length;
-            const baseHeight = 38; // for reference + padding
+            // Estimate height based on ~50 chars per line, plus reference, plus padding
+            const baseHeight = 38; 
             const textHeight = (Math.floor(text.length / 50) + lineBreaks) * 15;
             return baseHeight + textHeight;
         },
