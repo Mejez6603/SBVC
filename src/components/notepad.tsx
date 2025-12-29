@@ -210,9 +210,9 @@ export function Notepad() {
       
       <Separator />
 
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 flex-shrink-0">
         <div className="font-semibold text-sm">Notepad</div>
-        <Textarea className="h-40" placeholder="Take notes here..." />
+        <Textarea className="h-48" placeholder="Take notes here..." />
       </div>
 
     </div>
