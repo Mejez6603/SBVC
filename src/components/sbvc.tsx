@@ -105,7 +105,7 @@ export function SBVC({ version }: SBVCProps) {
         ) : verses.length > 0 ? verses.map(({ verse, text }) => (
           <button
             key={verse}
-            ref={(el) => verseRefs.current.set(verse, el)}
+            ref={(el) => { verseRefs.current.set(verse, el) }}
             onClick={() => handleVerseClick(verse, text)}
             className={cn(
               'flex items-start gap-2 text-left w-full p-2 rounded-md',
