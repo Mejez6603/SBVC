@@ -11,10 +11,11 @@ import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
 import { tagalogToEnglishBookMap } from '@/lib/bible';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 type Suggestion = {
     reference: string;
-    text: string;
+    text?: string;
 };
 
 type SearchResults = {
@@ -23,13 +24,10 @@ type SearchResults = {
   tcb: Suggestion[];
 }
 
-type BibleVersion = 'kjv' | 'adb' | 'tcb';
-
 export function Notepad() {
   const [topic, setTopic] = useState('');
   const [results, setResults] = useState<SearchResults>({ kjv: [], adb: [], tcb: [] });
   const [isLoading, setIsLoading] = useState(false);
-  const [activeVersion, setActiveVersion] = useState<BibleVersion>('kjv');
   const { navigateToVerse } = useBible();
 
   const handleSearch = async () => {
@@ -63,16 +61,48 @@ export function Notepad() {
     }
   };
 
-  const getHighlightedText = (text: string, highlight: string) => {
+  const getHighlightedText = (text: string | undefined, highlight: string) => {
     if (!highlight.trim() || !text) {
-      return text;
+      return text || '';
     }
     const regex = new RegExp(`(${highlight.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
     return text.replace(regex, `<mark class="bg-yellow-300 text-black rounded px-1">$1</mark>`);
   };
 
   const totalResults = results.kjv.length;
-  const activeResults = results[activeVersion];
+
+  const renderResults = (suggestions: Suggestion[]) => {
+    if (suggestions.length === 0) {
+      return (
+        <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
+          No results found for this version.
+        </div>
+      );
+    }
+    return (
+      <ScrollArea className="flex-1 border rounded-md bg-background min-h-0">
+        <div className="p-2">
+          {suggestions.map((suggestion, index) => (
+            <button 
+              key={index} 
+              className="w-full text-left p-2 rounded-md hover:bg-accent text-xs"
+              onClick={() => handleSuggestionClick(suggestion.reference)}
+            >
+              <div className="font-bold">{suggestion.reference}</div>
+              {suggestion.text ? (
+                <div 
+                  className="text-muted-foreground"
+                  dangerouslySetInnerHTML={{ __html: getHighlightedText(suggestion.text, topic) }}
+                />
+              ) : (
+                <div className="text-muted-foreground italic">Verse not available in this version.</div>
+              )}
+            </button>
+          ))}
+        </div>
+      </ScrollArea>
+    );
+  };
 
   return (
     <div className="flex flex-col p-4 space-y-4 h-full">
@@ -109,40 +139,16 @@ export function Notepad() {
                   <span>Searching...</span>
               </div>
           ) : totalResults > 0 ? (
-            <div className="flex-1 flex flex-col min-h-0">
-                <div className="grid w-full grid-cols-3 bg-muted p-1 rounded-md text-muted-foreground mb-2">
-                    <button onClick={() => setActiveVersion('kjv')} className={cn("inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", activeVersion === 'kjv' && 'bg-background text-foreground shadow-sm')}>KJV</button>
-                    <button onClick={() => setActiveVersion('adb')} className={cn("inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", activeVersion === 'adb' && 'bg-background text-foreground shadow-sm')}>ADB1905</button>
-                    <button onClick={() => setActiveVersion('tcb')} className={cn("inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", activeVersion === 'tcb' && 'bg-background text-foreground shadow-sm')}>TCB2015</button>
-                </div>
-                {activeResults.length > 0 ? (
-                  <ScrollArea className="flex-1 border rounded-md bg-background min-h-0">
-                    <div className="p-2">
-                      {activeResults.map((suggestion, index) => (
-                        <button 
-                          key={index} 
-                          className="w-full text-left p-2 rounded-md hover:bg-accent text-xs"
-                          onClick={() => handleSuggestionClick(suggestion.reference)}
-                        >
-                          <div className="font-bold">{suggestion.reference}</div>
-                          {suggestion.text ? (
-                            <div 
-                              className="text-muted-foreground"
-                              dangerouslySetInnerHTML={{ __html: getHighlightedText(suggestion.text, topic) }}
-                            />
-                          ) : (
-                            <div className="text-muted-foreground italic">Verse not available in this version.</div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                ) : (
-                  <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
-                    No results found for this version.
-                  </div>
-                )}
-            </div>
+            <Tabs defaultValue="kjv" className="flex-1 flex flex-col min-h-0">
+                <TabsList className="grid w-full grid-cols-3 mb-2">
+                    <TabsTrigger value="kjv">KJV</TabsTrigger>
+                    <TabsTrigger value="adb">ADB1905</TabsTrigger>
+                    <TabsTrigger value="tcb">TCB2015</TabsTrigger>
+                </TabsList>
+                <TabsContent value="kjv" className="flex-1 min-h-0 data-[state=inactive]:hidden">{renderResults(results.kjv)}</TabsContent>
+                <TabsContent value="adb" className="flex-1 min-h-0 data-[state=inactive]:hidden">{renderResults(results.adb)}</TabsContent>
+                <TabsContent value="tcb" className="flex-1 min-h-0 data-[state=inactive]:hidden">{renderResults(results.tcb)}</TabsContent>
+            </Tabs>
           ) : (
             <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center flex-1 border rounded-md">
               Enter a term to search for in the Bible (KJV, ADB1905, TCB2015).
