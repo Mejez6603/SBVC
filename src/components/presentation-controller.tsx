@@ -51,7 +51,7 @@ export function PresentationController() {
 
   return (
     <div className="p-4 border-b">
-      <DraggablePreview />
+      <DraggablePreview passage={passage} />
       <div className="grid grid-cols-5 gap-2 mt-4">
         <Button variant="outline" size="icon" onClick={handleShowScreen}>
           <Play />

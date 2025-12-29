@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import { useAppContext } from '@/context/app-context';
 
 const CUSTOMIZATION_KEY = 'sbvc-customization';
-const PASSAGE_KEY = 'present-passage';
 
 type Customization = {
   fontFamily: string;
@@ -23,9 +22,12 @@ type Customization = {
   };
 };
 
-export function DraggablePreview() {
+interface DraggablePreviewProps {
+  passage: Passage;
+}
+
+export function DraggablePreview({ passage }: DraggablePreviewProps) {
   const { theme } = useAppContext();
-  const [passage, setPassage] = useState<Passage>(null);
   const [customization, setCustomization] = useState<Customization>({
     fontFamily: 'Inter',
     fontSize: 5,
@@ -49,7 +51,7 @@ export function DraggablePreview() {
   const [isDraggingText, setIsDraggingText] = useState(false);
 
   useEffect(() => {
-    const syncState = () => {
+    const syncCustomization = () => {
         try {
             const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
             if (savedCustomization) {
@@ -64,19 +66,15 @@ export function DraggablePreview() {
                 if (parsed.horizontalPadding === undefined) parsed.horizontalPadding = 1;
                 setCustomization(c => ({...c, ...parsed}));
             }
-
-            const savedPassage = localStorage.getItem(PASSAGE_KEY);
-            setPassage(savedPassage ? JSON.parse(savedPassage) : null);
-
         } catch (e) {
             console.error("Failed to parse from local storage", e)
         }
     }
-    syncState();
+    syncCustomization();
 
     const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === CUSTOMIZATION_KEY || e.key === PASSAGE_KEY) {
-            syncState();
+        if (e.key === CUSTOMIZATION_KEY) {
+            syncCustomization();
         }
     }
     window.addEventListener('storage', handleStorageChange);
