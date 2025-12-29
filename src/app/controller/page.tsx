@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { BibleProvider, useBible } from '@/context/bible-context';
@@ -112,6 +110,7 @@ function Controller() {
             <TabsContent value="main" className="flex-1 flex flex-col min-h-0">
                 <PresentationController />
                 <Separator />
+                <div className="p-4 border-b text-sm font-semibold">Customization</div>
                 <ScrollArea className="flex-1">
                   <CustomizationController />
                 </ScrollArea>
