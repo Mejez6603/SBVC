@@ -16,6 +16,8 @@ interface BibleContextType {
   selectedVersion: BibleVersion;
   selectedTagalogVersion: 'ADB' | 'TCB';
   setSelectedTagalogVersion: (version: 'ADB' | 'TCB') => void;
+  selectedEnglishVersion: 'KJV';
+  setSelectedEnglishVersion: (version: 'KJV') => void;
 }
 
 const BibleContext = createContext<BibleContextType | undefined>(undefined);
@@ -27,6 +29,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const [selectedVerseText, setSelectedVerseText] = useState<string>('');
   const [selectedVersion, setSelectedVersion] = useState<BibleVersion>('KJV');
   const [selectedTagalogVersion, setSelectedTagalogVersion] = useState<'ADB' | 'TCB'>('ADB');
+  const [selectedEnglishVersion, setSelectedEnglishVersion] = useState<'KJV'>('KJV');
   
   // State for what is actually on the presentation screen
   const [presentedBook, setPresentedBook] = useState('Genesis');
@@ -100,7 +103,9 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     setSelectedVerse,
     selectedVersion,
     selectedTagalogVersion,
-    setSelectedTagalogVersion
+    setSelectedTagalogVersion,
+    selectedEnglishVersion,
+    setSelectedEnglishVersion
   };
 
   return <BibleContext.Provider value={value}>{children}</BibleContext.Provider>;

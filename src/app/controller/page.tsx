@@ -17,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
 function Controller() {
-  const { selectedTagalogVersion, setSelectedTagalogVersion } = useBible();
+  const { selectedTagalogVersion, setSelectedTagalogVersion, selectedEnglishVersion, setSelectedEnglishVersion } = useBible();
 
   const handleFullscreenRequest = () => {
     localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
@@ -67,14 +67,25 @@ function Controller() {
             <div className="flex flex-1 min-h-0">
                 <div className="flex-1 flex flex-col border-r h-full">
                     <div className="p-2 text-center font-bold text-xs border-b">English</div>
-                    <div className="p-2 text-center font-semibold text-xs border-b">KJV</div>
+                    <div className="p-2 text-center font-semibold text-xs border-b h-[53px] flex items-center justify-center">
+                        <div className="flex justify-center gap-2">
+                             <Button 
+                                variant={selectedEnglishVersion === 'KJV' ? 'default' : 'ghost'}
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                onClick={() => setSelectedEnglishVersion('KJV')}
+                            >
+                                KJV
+                            </Button>
+                        </div>
+                    </div>
                     <div className="flex-1 overflow-hidden">
-                        <SBVC version="KJV" />
+                        <SBVC version={selectedEnglishVersion} />
                     </div>
                 </div>
                 <div className="flex-1 flex flex-col h-full">
                     <div className="p-2 text-center font-bold text-xs border-b">Tagalog</div>
-                    <div className="p-2 text-center font-semibold text-xs border-b">
+                    <div className="p-2 text-center font-semibold text-xs border-b h-[53px] flex items-center justify-center">
                         <div className="flex justify-center gap-2">
                             <Button 
                                 variant={selectedTagalogVersion === 'ADB' ? 'default' : 'ghost'}
