@@ -14,6 +14,7 @@ const CUSTOMIZATION_KEY = 'sbvc-customization';
 type Customization = {
   fontFamily: string;
   fontSize: number;
+  titleFontFamily: string;
   titleFontSize: number;
   textAlign: 'left' | 'center' | 'right';
   positions: {
@@ -25,6 +26,7 @@ type Customization = {
 const defaultCustomization: Customization = {
     fontFamily: 'Inter',
     fontSize: 5,
+    titleFontFamily: 'Inter',
     titleFontSize: 4.5,
     textAlign: 'center',
     positions: { 
@@ -48,6 +50,9 @@ export function CustomizationController() {
       if (!parsed.titleFontSize) {
           parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
       }
+      if (!parsed.titleFontFamily) {
+        parsed.titleFontFamily = 'Inter';
+      }
       setCustomization(p => ({...p, ...parsed}));
     }
   }, []);
@@ -67,6 +72,24 @@ export function CustomizationController() {
     <div className="p-4 space-y-6">
        <div className="space-y-2">
         <div className="font-semibold text-sm">Title</div>
+         <div className="space-y-2">
+            <Label htmlFor="title-font-family">Font Family</Label>
+            <Select
+            value={customization.titleFontFamily}
+            onValueChange={(value) => updateCustomization({ titleFontFamily: value })}
+            >
+            <SelectTrigger id="title-font-family">
+                <SelectValue placeholder="Select a font" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="Inter">Inter (Sans-serif)</SelectItem>
+                <SelectItem value="Literata">Literata (Serif)</SelectItem>
+                <SelectItem value="monospace">Monospace</SelectItem>
+                <SelectItem value="Georgia">Georgia</SelectItem>
+                <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+            </SelectContent>
+            </Select>
+        </div>
          <div className="space-y-4">
             <Label htmlFor="title-font-size">Font Size ({customization.titleFontSize}rem)</Label>
             <Slider

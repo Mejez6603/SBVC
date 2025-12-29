@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,6 +12,7 @@ const CUSTOMIZATION_KEY = 'sbvc-customization';
 type Customization = {
   fontFamily: string;
   fontSize: number;
+  titleFontFamily: string;
   titleFontSize: number;
   textAlign: 'left' | 'center' | 'right';
   positions: {
@@ -28,6 +30,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
   const [customization, setCustomization] = useState<Customization>({
     fontFamily: 'Inter',
     fontSize: 5,
+    titleFontFamily: 'Inter',
     titleFontSize: 4.5,
     textAlign: 'center',
     positions: {
@@ -52,6 +55,9 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
                 }
                 if (!parsed.titleFontSize) {
                     parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
+                }
+                if (!parsed.titleFontFamily) {
+                    parsed.titleFontFamily = 'Inter';
                 }
                 setCustomization(c => ({...c, ...parsed}));
             } catch (e) {
@@ -100,9 +106,10 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
   }
   
   const titleStyle = {
-    ...passageStyle,
+    fontFamily: customization.titleFontFamily,
     fontSize: `${customization.titleFontSize * previewScale}rem`,
-    cursor: isDragging ? 'grabbing' : 'grab'
+    cursor: isDragging ? 'grabbing' : 'grab',
+    textAlign: customization.textAlign
   }
 
   return (

@@ -13,6 +13,7 @@ const CUSTOMIZATION_KEY = 'sbvc-customization';
 type Customization = {
   fontFamily: string;
   fontSize: number;
+  titleFontFamily: string;
   titleFontSize: number;
   textAlign: 'left' | 'center' | 'right';
   positions: {
@@ -27,6 +28,7 @@ export default function PresentPage() {
   const [customization, setCustomization] = useState<Customization>({
     fontFamily: 'Inter',
     fontSize: 5,
+    titleFontFamily: 'Inter',
     titleFontSize: 4.5,
     textAlign: 'center',
     positions: {
@@ -77,6 +79,9 @@ export default function PresentPage() {
                 }
                 if (!parsed.titleFontSize) {
                     parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
+                }
+                if (!parsed.titleFontFamily) {
+                    parsed.titleFontFamily = 'Inter';
                 }
                 setCustomization(c => ({...c, ...parsed}));
             }
@@ -129,8 +134,9 @@ export default function PresentPage() {
   }
   
   const titleStyle = {
-    ...passageStyle,
+    fontFamily: customization.titleFontFamily,
     fontSize: `${customization.titleFontSize}rem`,
+    textAlign: customization.textAlign,
   }
 
   return (
@@ -149,7 +155,7 @@ export default function PresentPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, x: customization.positions.title.x, y: customization.positions.title.y }}
                 exit={{ opacity: 0, y: -20 }}
-                className="font-bold text-primary/90 mb-8 text-center"
+                className="font-bold text-primary/90 mb-8"
                 style={titleStyle}
             >
               {passage.reference}
