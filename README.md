@@ -4,6 +4,8 @@
 
 SBVC is a modern, web-based application designed to facilitate the presentation of Bible passages for church services, Bible studies, and other gatherings. Built with Next.js and TypeScript, it offers a clean, distraction-free viewing experience for the audience and a powerful, intuitive control panel for the operator.
 
+![](images/sbvc001.png) 
+
 The system uses a dual-window approach:
 1.  **Controller Window**: A comprehensive dashboard for selecting books, chapters, and verses, searching for topics, customizing the look and feel, and previewing the output.
 2.  **Presentation Window**: A separate, clean output screen designed for a secondary monitor or projector. It displays only the selected verse and reference, ensuring the audience remains focused on the text.
@@ -130,8 +132,15 @@ The application is configured for easy deployment on modern hosting platforms th
 
 ## Acknowledgements
 
+-   GOD
 -   The developers of the many open-source libraries that made this project possible.
 -   The communities providing access to the digital Bible texts.
+-   Pastor Alberto M Mejes
+-   SBBC
+-   Mejez
+-   Dean Ryan Cruz
+-   Firelink
+
 
 ---
 
