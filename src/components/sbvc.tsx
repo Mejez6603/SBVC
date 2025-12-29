@@ -4,7 +4,7 @@
 import { useBible } from '@/context/bible-context';
 import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Skeleton } from './ui/skeleton';
 
 interface SBVCProps {
@@ -29,6 +29,17 @@ export function SBVC({ version }: SBVCProps) {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const verseRefs = useRef<Map<number, HTMLButtonElement | null>>(new Map());
+
+  useEffect(() => {
+    if (selectedVerse && verseRefs.current.has(selectedVerse)) {
+      const verseElement = verseRefs.current.get(selectedVerse);
+      verseElement?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [selectedVerse, version, verses]);
 
   useEffect(() => {
     const loadChapter = async () => {
@@ -37,6 +48,7 @@ export function SBVC({ version }: SBVCProps) {
       setIsLoading(true);
       setError(null);
       setVerses([]);
+      verseRefs.current.clear();
 
       try {
         const bookFileName = selectedBook.toLowerCase().replace(/\s/g, '');
@@ -93,6 +105,7 @@ export function SBVC({ version }: SBVCProps) {
         ) : verses.length > 0 ? verses.map(({ verse, text }) => (
           <button
             key={verse}
+            ref={(el) => verseRefs.current.set(verse, el)}
             onClick={() => handleVerseClick(verse, text)}
             className={cn(
               'flex items-start gap-2 text-left w-full p-2 rounded-md',
