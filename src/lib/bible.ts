@@ -1,3 +1,4 @@
+
 export const oldTestamentBooks = [
   "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", 
   "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", 
@@ -35,6 +36,8 @@ export const tagalogToEnglishBookMap: { [key: string]: string } = {
   "Esther": "Esther",
   "Job": "Job",
   "Mga Awit": "Psalms",
+  "Awit": "Psalms",
+  "Psalm": "Psalms",
   "Mga Kawikaan": "Proverbs",
   "Mangangaral": "Ecclesiastes",
   "Ang Awit ni Solomon": "Song of Solomon",
