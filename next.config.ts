@@ -1,14 +1,8 @@
 import type {NextConfig} from 'next';
 
-const repo = 'SBVC';
-const assetPrefix = `/${repo}/`;
-const basePath = `/${repo}`;
-
 const nextConfig: NextConfig = {
   /* config options here */
   output: 'export',
-  assetPrefix: assetPrefix,
-  basePath: basePath,
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -30,7 +24,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https' ,
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
