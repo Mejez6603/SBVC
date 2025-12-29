@@ -44,6 +44,9 @@ export default function PresentPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
+  const [isDraggingTitle, setIsDraggingTitle] = useState(false);
+  const [isDraggingText, setIsDraggingText] = useState(false);
+
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
       try {
@@ -62,15 +65,21 @@ export default function PresentPage() {
     }
   };
 
-  const handleDrag = (info: PanInfo, type: 'title' | 'text') => {
+  const handleDragEnd = (info: PanInfo, type: 'title' | 'text') => {
     const newPositions = { ...customization.positions };
     newPositions[type] = {
-      x: customization.positions[type].x + info.delta.x,
-      y: customization.positions[type].y + info.delta.y,
+      x: customization.positions[type].x + info.offset.x,
+      y: customization.positions[type].y + info.offset.y,
     };
     const newCustomization = { ...customization, positions: newPositions };
     setCustomization(newCustomization);
     localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
+
+    if (type === 'title') {
+        setIsDraggingTitle(false);
+    } else {
+        setIsDraggingText(false);
+    }
   };
 
   useEffect(() => {
@@ -207,7 +216,7 @@ export default function PresentPage() {
   }
 
   return (
-    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background py-4 transition-colors duration-300 overflow-hidden cursor-grab" style={mainStyle}>
+    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background py-4 transition-colors duration-300 overflow-hidden" style={mainStyle}>
       <AnimatePresence mode="wait">
         {passage ? (
           <motion.div
@@ -223,9 +232,14 @@ export default function PresentPage() {
             <motion.h1 
                 drag
                 dragMomentum={false}
-                onDrag={(e, i) => handleDrag(i, 'title')}
+                onDragStart={() => setIsDraggingTitle(true)}
+                onDragEnd={(e, i) => handleDragEnd(i, 'title')}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, x: customization.positions.title.x, y: customization.positions.title.y }}
+                animate={{
+                    opacity: 1,
+                    x: isDraggingTitle ? undefined : customization.positions.title.x,
+                    y: isDraggingTitle ? undefined : customization.positions.title.y
+                }}
                 exit={{ opacity: 0, y: -20 }}
                 className="font-bold text-primary/90 mb-2 cursor-grab active:cursor-grabbing"
                 style={titleStyle}
@@ -236,9 +250,14 @@ export default function PresentPage() {
                 ref={textRef}
                 drag
                 dragMomentum={false}
-                onDrag={(e, i) => handleDrag(i, 'text')}
+                onDragStart={() => setIsDraggingText(true)}
+                onDragEnd={(e, i) => handleDragEnd(i, 'text')}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, x: customization.positions.text.x, y: customization.positions.text.y }}
+                animate={{
+                    opacity: 1,
+                    x: isDraggingText ? undefined : customization.positions.text.x,
+                    y: isDraggingText ? undefined : customization.positions.text.y
+                }}
                 exit={{ opacity: 0, y: -20 }}
                 className="leading-relaxed text-foreground max-w-full whitespace-pre-wrap cursor-grab active:cursor-grabbing"
                 style={passageStyle}

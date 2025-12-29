@@ -40,7 +40,8 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
       text: { x: 0, y: 0 },
     },
   });
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingTitle, setIsDraggingTitle] = useState(false);
+  const [isDraggingText, setIsDraggingText] = useState(false);
   const [previewScale, setPreviewScale] = useState(1);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
@@ -88,19 +89,24 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
     }
   }, [containerRef]);
 
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo, type: 'title' | 'text') => {
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo, type: 'title' | 'text') => {
+    const scaleFactor = 1 / previewScale;
     const newPositions = { ...customization.positions };
     
-    const scaleFactor = 1 / previewScale;
-    
     newPositions[type] = {
-      x: customization.positions[type].x + info.delta.x * scaleFactor,
-      y: customization.positions[type].y + info.delta.y * scaleFactor,
+      x: customization.positions[type].x + info.offset.x * scaleFactor,
+      y: customization.positions[type].y + info.offset.y * scaleFactor,
     };
     
     const newCustomization = { ...customization, positions: newPositions };
     setCustomization(newCustomization);
     localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
+
+    if (type === 'title') {
+        setIsDraggingTitle(false);
+    } else {
+        setIsDraggingText(false);
+    }
   };
   
   const passageStyle = {
@@ -113,7 +119,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
   const titleStyle = {
     fontFamily: customization.titleFontFamily,
     fontSize: `${customization.titleFontSize * previewScale}rem`,
-    cursor: isDragging ? 'grabbing' : 'grab',
+    cursor: isDraggingTitle ? 'grabbing' : 'grab',
     textAlign: customization.textAlign
   }
 
@@ -133,13 +139,12 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
     >
         <motion.h1
             drag
-            onDragStart={() => setIsDragging(true)}
-            onDragEnd={() => setIsDragging(false)}
-            onDrag={(e, i) => handleDrag(e, i, 'title')}
+            onDragStart={() => setIsDraggingTitle(true)}
+            onDragEnd={(e, i) => handleDragEnd(e, i, 'title')}
             dragMomentum={false}
             animate={{ 
-                x: customization.positions.title.x * previewScale, 
-                y: customization.positions.title.y * previewScale 
+                x: isDraggingTitle ? undefined : customization.positions.title.x * previewScale, 
+                y: isDraggingTitle ? undefined : customization.positions.title.y * previewScale 
             }}
             className="font-bold mb-1 cursor-grab line-clamp-1"
             style={titleStyle}
@@ -148,16 +153,15 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
         </motion.h1>
         <motion.p
             drag
-            onDragStart={() => setIsDragging(true)}
-            onDragEnd={() => setIsDragging(false)}
-            onDrag={(e, i) => handleDrag(e, i, 'text')}
+            onDragStart={() => setIsDraggingText(true)}
+            onDragEnd={(e, i) => handleDragEnd(e, i, 'text')}
             dragMomentum={false}
             animate={{ 
-                x: customization.positions.text.x * previewScale, 
-                y: customization.positions.text.y * previewScale 
+                x: isDraggingText ? undefined : customization.positions.text.x * previewScale, 
+                y: isDraggingText ? undefined : customization.positions.text.y * previewScale
             }}
             className="whitespace-pre-wrap cursor-grab line-clamp-4"
-            style={{ ...passageStyle, cursor: isDragging ? 'grabbing' : 'grab' }}
+            style={{ ...passageStyle, cursor: isDraggingText ? 'grabbing' : 'grab' }}
         >
             {passage.text}
         </motion.p>
