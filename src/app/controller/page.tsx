@@ -116,7 +116,7 @@ function Controller() {
                     <CustomizationController />
                 </ScrollArea>
             </TabsContent>
-            <TabsContent value="ai" className="flex-1 flex flex-col">
+            <TabsContent value="ai" className="flex-1 flex flex-col min-h-0">
                 <Notepad />
             </TabsContent>
           </Tabs>
