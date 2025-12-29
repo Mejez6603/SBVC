@@ -118,7 +118,7 @@ function Controller() {
                 <TabsTrigger value="main">Controls</TabsTrigger>
                 <TabsTrigger value="ai">Search</TabsTrigger>
             </TabsList>
-            <TabsContent value="main" className="flex-1 flex flex-col min-h-0">
+            <TabsContent value="main" className="flex-1 flex flex-col min-h-0 data-[state=inactive]:hidden">
                 <PresentationController />
                 <Separator />
                 <div className="p-4 border-b text-sm font-semibold">Customization</div>
