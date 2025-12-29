@@ -9,6 +9,7 @@ import { suggestRelevantPassages } from '@/ai/flows/suggest-relevant-passages';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
+import { tagalogToEnglishBookMap } from '@/lib/bible';
 
 export function Notepad() {
   const [topic, setTopic] = useState('');
@@ -30,14 +31,15 @@ export function Notepad() {
   };
   
   const handleSuggestionClick = (passage: string) => {
-    // Example: "John 3:16" or "1 John 3:16"
     const match = passage.match(/(\d?\s?[a-zA-Z\s]+)\s(\d+):(\d+)/);
     if (match) {
         const [, book, chapter] = match;
         const bookName = book.trim();
         const chapterNum = parseInt(chapter, 10);
         
-        setSelectedBook(bookName);
+        const englishBookName = tagalogToEnglishBookMap[bookName] || bookName;
+
+        setSelectedBook(englishBookName);
         setSelectedChapter(chapterNum);
     }
   };
