@@ -65,6 +65,23 @@ export function CustomizationController() {
 
   return (
     <div className="p-4 space-y-6">
+       <div className="space-y-2">
+        <div className="font-semibold text-sm">Title</div>
+         <div className="space-y-4">
+            <Label htmlFor="title-font-size">Font Size ({customization.titleFontSize}rem)</Label>
+            <Slider
+              id="title-font-size"
+              min={1}
+              max={10}
+              step={0.25}
+              value={[customization.titleFontSize]}
+              onValueChange={(value) => updateCustomization({ titleFontSize: value[0] })}
+            />
+        </div>
+      </div>
+      
+      <Separator />
+
       <div className="space-y-2">
         <div className="font-semibold text-sm">Text</div>
         <Label htmlFor="font-family">Font Family</Label>
@@ -123,24 +140,7 @@ export function CustomizationController() {
           </Button>
         </div>
       </div>
-      
-      <Separator />
 
-      <div className="space-y-2">
-        <div className="font-semibold text-sm">Title</div>
-         <div className="space-y-4">
-            <Label htmlFor="title-font-size">Font Size ({customization.titleFontSize}rem)</Label>
-            <Slider
-              id="title-font-size"
-              min={1}
-              max={10}
-              step={0.25}
-              value={[customization.titleFontSize]}
-              onValueChange={(value) => updateCustomization({ titleFontSize: value[0] })}
-            />
-        </div>
-      </div>
-      
       <Separator />
 
       <div>
