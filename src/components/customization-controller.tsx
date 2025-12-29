@@ -14,6 +14,7 @@ const CUSTOMIZATION_KEY = 'sbvc-customization';
 type Customization = {
   fontFamily: string;
   fontSize: number;
+  titleFontSize: number;
   textAlign: 'left' | 'center' | 'right';
   positions: {
     title: { x: number; y: number };
@@ -24,6 +25,7 @@ type Customization = {
 const defaultCustomization: Customization = {
     fontFamily: 'Inter',
     fontSize: 5,
+    titleFontSize: 4.5,
     textAlign: 'center',
     positions: { 
         title: { x: 0, y: 0 },
@@ -38,12 +40,15 @@ export function CustomizationController() {
     const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
     if (savedCustomization) {
       const parsed = JSON.parse(savedCustomization);
-      // Backwards compatibility for old structure
+      // Backwards compatibility for old structures
       if (parsed.position) {
           parsed.positions = { title: parsed.position, text: parsed.position };
           delete parsed.position;
       }
-      setCustomization(parsed);
+      if (!parsed.titleFontSize) {
+          parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
+      }
+      setCustomization(p => ({...p, ...parsed}));
     }
   }, []);
 
@@ -61,6 +66,7 @@ export function CustomizationController() {
   return (
     <div className="p-4 space-y-6">
       <div className="space-y-2">
+        <div className="font-semibold text-sm">Text</div>
         <Label htmlFor="font-family">Font Family</Label>
         <Select
           value={customization.fontFamily}
@@ -115,6 +121,23 @@ export function CustomizationController() {
           >
             <AlignRight />
           </Button>
+        </div>
+      </div>
+      
+      <Separator />
+
+      <div className="space-y-2">
+        <div className="font-semibold text-sm">Title</div>
+         <div className="space-y-4">
+            <Label htmlFor="title-font-size">Font Size ({customization.titleFontSize}rem)</Label>
+            <Slider
+              id="title-font-size"
+              min={1}
+              max={10}
+              step={0.25}
+              value={[customization.titleFontSize]}
+              onValueChange={(value) => updateCustomization({ titleFontSize: value[0] })}
+            />
         </div>
       </div>
       

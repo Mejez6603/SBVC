@@ -13,6 +13,7 @@ const CUSTOMIZATION_KEY = 'sbvc-customization';
 type Customization = {
   fontFamily: string;
   fontSize: number;
+  titleFontSize: number;
   textAlign: 'left' | 'center' | 'right';
   positions: {
     title: { x: number; y: number };
@@ -26,6 +27,7 @@ export default function PresentPage() {
   const [customization, setCustomization] = useState<Customization>({
     fontFamily: 'Inter',
     fontSize: 5,
+    titleFontSize: 4.5,
     textAlign: 'center',
     positions: {
       title: { x: 0, y: 0 },
@@ -83,12 +85,15 @@ export default function PresentPage() {
             const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
             if (savedCustomization) {
                 const parsed = JSON.parse(savedCustomization);
-                // Backwards compatibility for old position structure
+                // Backwards compatibility for old structures
                 if (parsed.position) {
                     parsed.positions = { title: parsed.position, text: parsed.position };
                     delete parsed.position;
                 }
-                setCustomization(parsed);
+                if (!parsed.titleFontSize) {
+                    parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
+                }
+                setCustomization(c => ({...c, ...parsed}));
             }
         }
       } catch (error) {
@@ -137,6 +142,12 @@ export default function PresentPage() {
     fontSize: `${customization.fontSize}rem`,
     textAlign: customization.textAlign,
   }
+  
+  const titleStyle = {
+    ...passageStyle,
+    fontSize: `${customization.titleFontSize}rem`,
+    cursor: isDragging ? 'grabbing' : 'grab'
+  }
 
   return (
     <main className="flex h-screen w-screen items-center justify-center bg-background p-8 transition-colors duration-300 overflow-hidden">
@@ -152,15 +163,15 @@ export default function PresentPage() {
           >
             <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0, x: customization.positions.title.x, y: customization.positions.title.y }}
+                animate={{ opacity: 1, x: customization.positions.title.x, y: customization.positions.title.y }}
                 exit={{ opacity: 0, y: -20 }}
                 drag
                 onDragStart={() => setIsDragging(true)}
                 onDragEnd={() => setIsDragging(false)}
                 onDrag={(e, i) => handleDrag(e, i, 'title')}
                 dragMomentum={false}
-                className="font-bold text-5xl sm:text-6xl md:text-7xl text-primary/90 mb-8 cursor-grab text-center"
-                style={{ fontSize: `${customization.fontSize * 0.9}rem`, cursor: isDragging ? 'grabbing' : 'grab' }}
+                className="font-bold text-primary/90 mb-8 cursor-grab text-center"
+                style={titleStyle}
             >
               {passage.reference}
             </motion.h1>
