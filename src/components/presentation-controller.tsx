@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAppContext } from '@/context/app-context';
@@ -50,21 +51,7 @@ export function PresentationController() {
 
   return (
     <div className="p-4 border-b">
-      <AnimatePresence>
-        {passage ? (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
-            <DraggablePreview passage={passage} />
-          </motion.div>
-        ) : (
-            <Card className="bg-card/50 aspect-video flex items-center justify-center">
-                <p className="text-sm text-muted-foreground">No passage selected</p>
-            </Card>
-        )}
-      </AnimatePresence>
+      <DraggablePreview />
       <div className="grid grid-cols-5 gap-2 mt-4">
         <Button variant="outline" size="icon" onClick={handleShowScreen}>
           <Play />
@@ -85,3 +72,5 @@ export function PresentationController() {
     </div>
   );
 }
+
+    
