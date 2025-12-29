@@ -27,6 +27,13 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const [selectedVerseText, setSelectedVerseText] = useState<string>('');
   const [selectedVersion, setSelectedVersion] = useState<BibleVersion>('KJV');
   const [selectedTagalogVersion, setSelectedTagalogVersion] = useState<'ADB' | 'TCB'>('ADB');
+  
+  // State for what is actually on the presentation screen
+  const [presentedBook, setPresentedBook] = useState('Genesis');
+  const [presentedChapter, setPresentedChapter] = useState(1);
+  const [presentedVerse, setPresentedVerse] = useState<number | null>(null);
+  const [presentedVerseText, setPresentedVerseText] = useState('');
+
   const { setPassage } = useAppContext();
 
   useEffect(() => {
@@ -43,37 +50,44 @@ export function BibleProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    if (selectedVerse !== null && selectedBook && selectedChapter && selectedVerseText) {
+    if (presentedVerse !== null && presentedBook && presentedChapter && presentedVerseText) {
       const newPassage: Passage = {
-        reference: `${selectedBook} ${selectedChapter}:${selectedVerse}`,
-        text: selectedVerseText,
+        reference: `${presentedBook} ${presentedChapter}:${presentedVerse}`,
+        text: presentedVerseText,
       };
       updatePresentation(newPassage);
     } else {
         updatePresentation(null);
     }
-  }, [selectedVerse, selectedBook, selectedChapter, selectedVersion, selectedVerseText, setPassage]);
+  }, [presentedVerse, presentedBook, presentedChapter, presentedVerseText, setPassage]);
 
   const handleSetSelectedBook = (book: string) => {
     setSelectedBook(book);
     setSelectedChapter(1);
-    // Do not clear the selected verse
   };
 
   const handleSetSelectedChapter = (chapter: number) => {
     setSelectedChapter(chapter);
-    // Do not clear the selected verse
   };
 
   const setSelectedVerse = (verse: number | null, version: BibleVersion, text: string) => {
     if (verse === selectedVerse && version === selectedVersion) {
-        // If clicking the same verse again, clear the selection
+        // If clicking the same verse again, clear the selection and presentation
         setInternalSelectedVerse(null);
         setSelectedVerseText('');
+        setPresentedVerse(null);
+        setPresentedVerseText('');
     } else {
+        // Update the selection in the controller
         setInternalSelectedVerse(verse);
         setSelectedVersion(version);
         setSelectedVerseText(text);
+
+        // Explicitly update what's being presented
+        setPresentedBook(selectedBook);
+        setPresentedChapter(selectedChapter);
+        setPresentedVerse(verse);
+        setPresentedVerseText(text);
     }
   }
 
