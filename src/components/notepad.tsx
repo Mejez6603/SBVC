@@ -3,7 +3,7 @@
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Loader, Search as SearchIcon } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { searchBible } from '@/ai/flows/search-bible';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
@@ -11,6 +11,7 @@ import { Separator } from './ui/separator';
 import { tagalogToEnglishBookMap } from '@/lib/bible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { ScrollArea } from './ui/scroll-area';
 
 type Suggestion = {
     reference: string;
@@ -36,6 +37,8 @@ function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight }: {
 
     return (
         <div
+            key={virtualItem.key}
+            data-index={virtualItem.index}
             style={{
                 position: 'absolute',
                 top: 0,
@@ -68,7 +71,13 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     const rowVirtualizer = useVirtualizer({
         count: suggestions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 70,
+        estimateSize: (index) => {
+            const text = suggestions[index].text || '';
+            const lines = text.split('\n').length;
+            const baseHeight = 40; // Approx height for reference
+            const textHeight = lines * 15;
+            return baseHeight + textHeight;
+        },
         overscan: 5,
     });
     
@@ -83,7 +92,7 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     }
     
     return (
-        <div ref={parentRef} className="h-full w-full overflow-auto relative border rounded-md bg-background">
+        <ScrollArea ref={parentRef} className="h-full w-full border rounded-md bg-background">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -92,44 +101,16 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
             }}
           >
             {virtualItems.map((virtualItem) => (
-                <div
+                <ResultRow
                     key={virtualItem.key}
-                    data-index={virtualItem.index}
-                    ref={rowVirtualizer.measureElement}
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        transform: `translateY(${virtualItem.start}px)`,
-                    }}
-                >
-                    <button
-                        className="w-full text-left p-2 hover:bg-accent text-xs border-b"
-                        onClick={() => onSuggestionClick(suggestions[virtualItem.index].reference)}
-                    >
-                        <div className="font-bold">{suggestions[virtualItem.index].reference}</div>
-                        {suggestions[virtualItem.index].text ? (
-                            <div
-                                className="text-muted-foreground whitespace-pre-wrap"
-                                dangerouslySetInnerHTML={(() => {
-                                    const text = suggestions[virtualItem.index].text;
-                                    const term = highlight;
-                                    if (!term.trim() || !text) {
-                                      return { __html: text || '' };
-                                    }
-                                    const regex = new RegExp(`(${term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
-                                    return { __html: text.replace(regex, `<mark class="bg-yellow-300 text-black rounded px-1">$1</mark>`) };
-                                })()}
-                            />
-                        ) : (
-                            <div className="text-muted-foreground italic">Verse not available in this version.</div>
-                        )}
-                    </button>
-                </div>
+                    virtualItem={virtualItem}
+                    suggestions={suggestions}
+                    onSuggestionClick={onSuggestionClick}
+                    highlight={highlight}
+                />
             ))}
           </div>
-        </div>
+        </ScrollArea>
     );
 }
 
