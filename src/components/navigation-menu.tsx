@@ -6,9 +6,9 @@ import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/controller', label: 'SBVC' },
-  { href: '#', label: 'Hymnals' },
-  { href: '#', label: 'Preaching' },
-  { href: '#', label: 'About' },
+  { href: '/hymnals', label: 'Hymnals' },
+  { href: '/preaching', label: 'Preaching' },
+  { href: '/about', label: 'About' },
 ];
 
 export function NavigationMenu() {
