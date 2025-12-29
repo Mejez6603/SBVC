@@ -4,14 +4,14 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Loader, Search as SearchIcon } from 'lucide-react';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { searchBible } from '@/ai/flows/search-bible';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
 import { tagalogToEnglishBookMap } from '@/lib/bible';
 import { cn } from '@/lib/utils';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 type Suggestion = {
@@ -39,9 +39,23 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     const rowVirtualizer = useVirtualizer({
         count: suggestions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 56, // Estimate size of each row
+        estimateSize: (index) => {
+          const suggestion = suggestions[index];
+          // A rough estimate based on text length. Adjust multiplier as needed.
+          const baseHeight = 50; 
+          const textHeight = suggestion.text ? Math.ceil(suggestion.text.length / 50) * 20 : 0;
+          return baseHeight + textHeight;
+        }, 
         overscan: 5,
     });
+    
+    const virtualItems = rowVirtualizer.getVirtualItems();
+
+    useEffect(() => {
+        // This is a workaround to force re-measurement when tabs change
+        // as the virtualizer might not be aware of the new scroll container.
+        rowVirtualizer.measure();
+    }, [suggestions, rowVirtualizer]);
 
     if (suggestions.length === 0) {
       return (
@@ -60,26 +74,34 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
               position: 'relative',
             }}
           >
-            {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+            {virtualItems.map((virtualItem) => {
               const suggestion = suggestions[virtualItem.index];
+              const nodeRef = useRef<HTMLButtonElement>(null);
+
+              useEffect(() => {
+                if (nodeRef.current) {
+                    rowVirtualizer.measureElement(nodeRef.current)
+                }
+              }, [nodeRef, rowVirtualizer]);
+
               return (
                 <button
                   key={virtualItem.key}
+                  ref={nodeRef}
                   style={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     width: '100%',
-                    height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
-                  className="w-full text-left p-2 hover:bg-accent text-xs"
+                  className="w-full text-left p-2 hover:bg-accent text-xs border-b"
                   onClick={() => onSuggestionClick(suggestion.reference)}
                 >
                   <div className="font-bold">{suggestion.reference}</div>
                   {suggestion.text ? (
                     <div
-                      className="text-muted-foreground truncate"
+                      className="text-muted-foreground whitespace-pre-wrap"
                       dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
                     />
                   ) : (
