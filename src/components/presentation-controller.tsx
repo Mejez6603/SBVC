@@ -1,13 +1,12 @@
-
 'use client';
 
 import { useAppContext } from '@/context/app-context';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
-import { Moon, Play, Sun, X, Frame } from 'lucide-react';
+import { Moon, Play, Sun, X, RefreshCw } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
+const CUSTOMIZATION_KEY = 'sbvc-customization';
 
 export function PresentationController() {
   const { passage, setPassage, theme, toggleTheme } = useAppContext();
@@ -34,8 +33,13 @@ export function PresentationController() {
     }
   }
 
-  const handleFullscreenRequest = () => {
-    localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
+  const handleResetPosition = () => {
+    const saved = localStorage.getItem(CUSTOMIZATION_KEY);
+    if (saved) {
+        const currentCustomization = JSON.parse(saved);
+        currentCustomization.positions = { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } };
+        localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(currentCustomization));
+    }
   };
 
   return (
@@ -66,8 +70,8 @@ export function PresentationController() {
         <Button variant="outline" size="icon" onClick={toggleTheme}>
             {theme === 'dark' ? <Sun/> : <Moon />}
         </Button>
-        <Button variant="outline" size="icon" onClick={handleFullscreenRequest}>
-            <Frame />
+        <Button variant="outline" size="icon" onClick={handleResetPosition}>
+            <RefreshCw />
         </Button>
       </div>
     </div>

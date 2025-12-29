@@ -142,16 +142,6 @@ export function CustomizationController() {
       </div>
 
       <Separator />
-
-      <div>
-        <Label>Position</Label>
-        <p className="text-xs text-muted-foreground mb-2">You can drag the text and title on the presentation screen to reposition them.</p>
-        <Button variant="outline" size="sm" onClick={() => updateCustomization({ positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } } })}>
-          <RefreshCw className="mr-2 h-4 w-4" /> Reset Positions
-        </Button>
-      </div>
-      
-      <Separator />
       
       <Button variant="destructive" className="w-full" onClick={resetCustomization}>
         Reset All Customizations
