@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CustomizationController } from '@/components/customization-controller';
+import { Separator } from '@/components/ui/separator';
 
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 
@@ -103,16 +104,14 @@ function Controller() {
           </div>
         </div>
         <div className="w-[350px] border-l flex flex-col">
-          <Tabs defaultValue="present" className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 m-2">
-                <TabsTrigger value="present">Present</TabsTrigger>
-                <TabsTrigger value="customize">Customize</TabsTrigger>
+          <Tabs defaultValue="main" className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-2 m-2">
+                <TabsTrigger value="main">Controls</TabsTrigger>
                 <TabsTrigger value="ai">AI</TabsTrigger>
             </TabsList>
-            <TabsContent value="present" className="flex-1 flex flex-col">
+            <TabsContent value="main" className="flex-1 flex flex-col overflow-y-auto">
                 <PresentationController />
-            </TabsContent>
-            <TabsContent value="customize" className="flex-1 flex flex-col">
+                <Separator className="my-4" />
                 <CustomizationController />
             </TabsContent>
             <TabsContent value="ai" className="flex-1 flex flex-col">
