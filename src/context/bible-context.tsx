@@ -13,6 +13,7 @@ interface BibleContextType {
   setSelectedChapter: (chapter: number) => void;
   selectedVerse: number | null;
   setSelectedVerse: (verse: number | null, version: BibleVersion, text: string) => void;
+  navigateToVerse: (book: string, chapter: number, verse: number) => void;
   selectedVersion: BibleVersion;
   selectedTagalogVersion: 'ADB' | 'TCB';
   setSelectedTagalogVersion: (version: 'ADB' | 'TCB') => void;
@@ -67,10 +68,12 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const handleSetSelectedBook = (book: string) => {
     setSelectedBook(book);
     setSelectedChapter(1);
+    setInternalSelectedVerse(null); // Clear verse selection when changing book
   };
 
   const handleSetSelectedChapter = (chapter: number) => {
     setSelectedChapter(chapter);
+    setInternalSelectedVerse(null); // Clear verse selection when changing chapter
   };
 
   const setSelectedVerse = (verse: number | null, version: BibleVersion, text: string) => {
@@ -94,6 +97,14 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const navigateToVerse = (book: string, chapter: number, verse: number) => {
+    setSelectedBook(book);
+    setSelectedChapter(chapter);
+    setInternalSelectedVerse(verse);
+    // This function does NOT update the presentation state
+  };
+
+
   const value = {
     selectedBook,
     setSelectedBook: handleSetSelectedBook,
@@ -101,6 +112,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     setSelectedChapter: handleSetSelectedChapter,
     selectedVerse,
     setSelectedVerse,
+    navigateToVerse,
     selectedVersion,
     selectedTagalogVersion,
     setSelectedTagalogVersion,

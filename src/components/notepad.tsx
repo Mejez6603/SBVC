@@ -20,7 +20,7 @@ export function Notepad() {
   const [topic, setTopic] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { setSelectedBook, setSelectedChapter } = useBible();
+  const { navigateToVerse } = useBible();
 
   const handleSearch = async () => {
     if (!topic) return;
@@ -38,14 +38,14 @@ export function Notepad() {
   const handleSuggestionClick = (passage: string) => {
     const match = passage.match(/(\d?\s?[a-zA-Z\s]+)\s(\d+):(\d+)/);
     if (match) {
-        const [, book, chapter] = match;
+        const [, book, chapter, verse] = match;
         const bookName = book.trim();
         const chapterNum = parseInt(chapter, 10);
+        const verseNum = parseInt(verse, 10);
         
         const englishBookName = tagalogToEnglishBookMap[bookName] || bookName;
 
-        setSelectedBook(englishBookName);
-        setSelectedChapter(chapterNum);
+        navigateToVerse(englishBookName, chapterNum, verseNum);
     }
   };
 
