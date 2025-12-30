@@ -6,7 +6,7 @@
  * - SearchBibleInput - The input type for the searchBible function.
  * - SearchBibleOutput - The return type for the searchBible function.
  */
-
+import '@vercel/node-bridge';
 import { z } from 'genkit';
 import path from 'path';
 import fs from 'fs/promises';
@@ -34,6 +34,10 @@ const bibleVersions = ['kjv', 'adb', 'tcb'];
 
 const bibleDataCache: { [version: string]: { [book: string]: any } } = {};
 
+// Determine the root directory for data files.
+// In Vercel, `process.cwd()` is the project root. For local dev, we need to go up from `src/ai/flows`.
+const dataRoot = process.env.VERCEL ? process.cwd() : path.join(__dirname, '..', '..', '..');
+
 async function loadBook(version: string, bookName: string) {
   if (!bookName) return null;
   const bookFileName = bookName.toLowerCase().replace(/\s/g, '') + '.json';
@@ -41,7 +45,7 @@ async function loadBook(version: string, bookName: string) {
     return bibleDataCache[version][bookFileName];
   }
 
-  const bibleDir = path.join(process.cwd(), 'public', 'bible', version);
+  const bibleDir = path.join(dataRoot, 'public', 'bible', version);
   const filePath = path.join(bibleDir, bookFileName);
 
   try {
