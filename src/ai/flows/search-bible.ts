@@ -34,9 +34,10 @@ const bibleVersions = ['kjv', 'adb', 'tcb'];
 
 const bibleDataCache: { [version: string]: { [book: string]: any } } = {};
 
-// Determine the root directory for data files.
-// In Vercel, `process.cwd()` is the project root. For local dev, we need to go up from `src/ai/flows`.
-const dataRoot = process.env.VERCEL ? process.cwd() : path.join(__dirname, '..', '..', '..');
+// When running on Vercel, the `public` directory is not in the same place.
+// We need to use `path.join` with `process.cwd()` to build a reliable path.
+const dataRoot = path.join(process.cwd(), 'public');
+
 
 async function loadBook(version: string, bookName: string) {
   if (!bookName) return null;
@@ -45,7 +46,7 @@ async function loadBook(version: string, bookName: string) {
     return bibleDataCache[version][bookFileName];
   }
 
-  const bibleDir = path.join(dataRoot, 'public', 'bible', version);
+  const bibleDir = path.join(dataRoot, 'bible', version);
   const filePath = path.join(bibleDir, bookFileName);
 
   try {
@@ -59,7 +60,7 @@ async function loadBook(version: string, bookName: string) {
 
     return bookData;
   } catch (e) {
-    // console.error(`Could not read or parse ${bookFileName} for version ${version}:`, e);
+    // console.error(`Could not read or parse ${filePath} for version ${version}:`, e);
     return null;
   }
 }
