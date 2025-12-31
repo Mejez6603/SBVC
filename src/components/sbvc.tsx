@@ -52,14 +52,10 @@ export function SBVC({ version }: SBVCProps) {
 
       try {
         const bookFileName = selectedBook.toLowerCase().replace(/\s/g, '');
-        const versionDir = version === 'KJV' ? 'kjv' : version === 'ADB' ? 'adb' : 'tcb';
-        const response = await fetch(`/bible/${versionDir}/${bookFileName}.json`);
+        const versionDir = version.toLowerCase();
         
-        if (!response.ok) {
-          throw new Error(`Could not load ${selectedBook}. File not found.`);
-        }
-
-        const bookData: BookData = await response.json();
+        const bookModule = await import(`@/lib/bible/${versionDir}/${bookFileName}.json`);
+        const bookData: BookData = bookModule.default;
         
         const chapterData = bookData[selectedChapter];
 
@@ -74,7 +70,7 @@ export function SBVC({ version }: SBVCProps) {
         }
 
       } catch (e: any) {
-        setError(e.message || `An error occurred while loading data for ${version}.`);
+        setError(`Could not load ${selectedBook}. File not found.`);
         setVerses([]);
         console.error(e);
       } finally {
