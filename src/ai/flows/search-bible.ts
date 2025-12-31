@@ -9,8 +9,6 @@
 import { z } from 'genkit';
 import { oldTestamentBooks, newTestamentBooks } from '@/lib/bible';
 import { ai } from '@/ai/genkit';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 
 const PassageSchema = z.object({
     reference: z.string().describe('The Bible passage reference (e.g., "John 3:16").'),
@@ -35,28 +33,27 @@ const bibleVersions = ['kjv', 'adb', 'tcb'];
 const bibleDataCache: { [version: string]: { [book: string]: any } } = {};
 
 async function loadBook(version: string, bookName: string) {
-  if (!bookName) return null;
-  const bookFileName = bookName.toLowerCase().replace(/\s/g, '') + '.json';
-  if (bibleDataCache[version] && bibleDataCache[version][bookFileName]) {
-    return bibleDataCache[version][bookFileName];
-  }
-  
-  try {
-    // Correctly resolve path to bundled data files in `src/lib/bible`
-    const filePath = path.join(process.cwd(), 'src', 'lib', 'bible', version, bookFileName);
-    const fileContent = await fs.readFile(filePath, 'utf-8');
-    const bookData = JSON.parse(fileContent);
+    if (!bookName) return null;
+    const bookFileName = bookName.toLowerCase().replace(/\s/g, '');
 
-    if (!bibleDataCache[version]) {
-      bibleDataCache[version] = {};
+    if (bibleDataCache[version] && bibleDataCache[version][bookFileName]) {
+        return bibleDataCache[version][bookFileName];
     }
-    bibleDataCache[version][bookFileName] = bookData;
 
-    return bookData;
-  } catch (e) {
-    // console.error(`Could not read or parse ${bookFileName} for version ${version}:`, e);
-    return null;
-  }
+    try {
+        const bookModule = await import(`@/lib/bible/${version}/${bookFileName}.json`);
+        const bookData = bookModule.default;
+
+        if (!bibleDataCache[version]) {
+            bibleDataCache[version] = {};
+        }
+        bibleDataCache[version][bookFileName] = bookData;
+
+        return bookData;
+    } catch (e) {
+        // console.error(`Could not import ${bookFileName}.json for version ${version}:`, e);
+        return null;
+    }
 }
 
 export const searchBible = ai.defineFlow(
