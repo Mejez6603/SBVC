@@ -3,7 +3,7 @@
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Loader, Search as SearchIcon } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { searchBible } from '@/ai/flows/search-bible';
 import { useBible } from '@/context/bible-context';
 import { Textarea } from './ui/textarea';
@@ -51,6 +51,27 @@ function ResultRow({ suggestion, onSuggestionClick, highlight }: { suggestion: S
 }
 
 function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string }) {
+    const [currentPage, setCurrentPage] = useState(1);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const ITEMS_PER_PAGE = 1000;
+
+    const totalPages = Math.ceil(suggestions.length / ITEMS_PER_PAGE);
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentSuggestions = suggestions.slice(startIndex, endIndex);
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        if (scrollRef.current) {
+            // Access the viewport of the scroll area to scroll to the top
+            const viewport = scrollRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+            if (viewport) {
+                viewport.scrollTop = 0;
+            }
+        }
+    };
+
     if (suggestions.length === 0) {
       return (
         <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
@@ -60,18 +81,43 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     }
     
     return (
-        <ScrollArea className="h-full w-full relative border rounded-md bg-background">
-            <div className="p-2">
-                {suggestions.map((suggestion, index) => (
-                    <ResultRow 
-                        key={index}
-                        suggestion={suggestion}
-                        onSuggestionClick={onSuggestionClick}
-                        highlight={highlight}
-                    />
-                ))}
-            </div>
-        </ScrollArea>
+        <div className="h-full w-full flex flex-col">
+            <ScrollArea ref={scrollRef} className="flex-1 relative border rounded-md bg-background">
+                <div className="p-2">
+                    {currentSuggestions.map((suggestion, index) => (
+                        <ResultRow 
+                            key={startIndex + index}
+                            suggestion={suggestion}
+                            onSuggestionClick={onSuggestionClick}
+                            highlight={highlight}
+                        />
+                    ))}
+                </div>
+            </ScrollArea>
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-2 text-xs">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </Button>
+                    <span>
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next
+                    </Button>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -112,11 +158,19 @@ export function Notepad() {
     }
   };
 
-  const totalResults = results.kjv.length;
+  const totalResultsCount = results.kjv.length + results.adb.length + results.tcb.length;
 
   const renderResults = (suggestions: Suggestion[]) => {
     return <ResultList suggestions={suggestions} onSuggestionClick={handleSuggestionClick} highlight={topic} />;
   };
+
+  const getResultCounts = () => {
+    const counts = [];
+    if (results.kjv.length > 0) counts.push(`${results.kjv.length} in KJV`);
+    if (results.adb.length > 0) counts.push(`${results.adb.length} in ADB`);
+    if (results.tcb.length > 0) counts.push(`${results.tcb.length} in TCB`);
+    return counts.join(', ');
+  }
 
   return (
     <div className="flex flex-col p-4 space-y-4 h-full">
@@ -139,9 +193,9 @@ export function Notepad() {
             {isLoading ? <Loader className="animate-spin" /> : <SearchIcon />}
           </Button>
         </div>
-        {totalResults > 0 && !isLoading && (
+        {totalResultsCount > 0 && !isLoading && (
             <p className="text-xs text-muted-foreground mt-2">
-                Found {totalResults} results.
+                Found {getResultCounts()}.
             </p>
         )}
       </div>
@@ -152,12 +206,12 @@ export function Notepad() {
                   <Loader className="animate-spin mr-2 h-4 w-4" />
                   <span>Searching...</span>
               </div>
-          ) : totalResults > 0 ? (
+          ) : totalResultsCount > 0 ? (
             <Tabs defaultValue="kjv" className="flex-1 flex flex-col min-h-0">
                 <TabsList className="grid w-full grid-cols-3 mb-2">
-                    <TabsTrigger value="kjv">KJV</TabsTrigger>
-                    <TabsTrigger value="adb">ADB1905</TabsTrigger>
-                    <TabsTrigger value="tcb">TCB2015</TabsTrigger>
+                    <TabsTrigger value="kjv">KJV ({results.kjv.length})</TabsTrigger>
+                    <TabsTrigger value="adb">ADB1905 ({results.adb.length})</TabsTrigger>
+                    <TabsTrigger value="tcb">TCB2015 ({results.tcb.length})</TabsTrigger>
                 </TabsList>
                 <TabsContent value="kjv" className="flex-1 min-h-0 data-[state=inactive]:hidden">{renderResults(results.kjv)}</TabsContent>
                 <TabsContent value="adb" className="flex-1 min-h-0 data-[state=inactive]:hidden">{renderResults(results.adb)}</TabsContent>
