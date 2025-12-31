@@ -10,7 +10,6 @@ import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
 import { tagalogToEnglishBookMap } from '@/lib/bible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { ScrollArea } from './ui/scroll-area';
 
 type Suggestion = {
@@ -24,9 +23,7 @@ type SearchResults = {
   tcb: Suggestion[];
 }
 
-function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight }: { virtualItem: any, suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string }) {
-    const suggestion = suggestions[virtualItem.index];
-
+function ResultRow({ suggestion, onSuggestionClick, highlight }: { suggestion: Suggestion, onSuggestionClick: (ref: string) => void, highlight: string }) {
     const getHighlightedText = (text: string | undefined, highlight: string) => {
         if (!highlight.trim() || !text) {
           return { __html: text || '' };
@@ -36,52 +33,24 @@ function ResultRow({ virtualItem, suggestions, onSuggestionClick, highlight }: {
     };
 
     return (
-        <div
-            key={virtualItem.key}
-            style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                transform: `translateY(${virtualItem.start}px)`,
-            }}
+        <button
+            className="w-full text-left p-2 hover:bg-accent text-xs border-b"
+            onClick={() => onSuggestionClick(suggestion.reference)}
         >
-            <button
-                className="w-full text-left p-2 hover:bg-accent text-xs border-b"
-                onClick={() => onSuggestionClick(suggestion.reference)}
-            >
-                <div className="font-bold">{suggestion.reference}</div>
-                {suggestion.text ? (
-                    <div
-                        className="text-muted-foreground whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
-                    />
-                ) : (
-                    <div className="text-muted-foreground italic">Verse not available in this version.</div>
-                )}
-            </button>
-        </div>
+            <div className="font-bold">{suggestion.reference}</div>
+            {suggestion.text ? (
+                <div
+                    className="text-muted-foreground whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={getHighlightedText(suggestion.text, highlight)}
+                />
+            ) : (
+                <div className="text-muted-foreground italic">Verse not available in this version.</div>
+            )}
+        </button>
     );
 }
 
 function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions: Suggestion[], onSuggestionClick: (ref: string) => void, highlight: string }) {
-    const parentRef = useRef<HTMLDivElement>(null);
-
-    const rowVirtualizer = useVirtualizer({
-        count: suggestions.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: (index) => {
-            const text = suggestions[index]?.text || '';
-            const lineBreaks = (text.match(/\n/g) || []).length;
-            const baseHeight = 40; // Base height for reference
-            const textHeight = Math.ceil(text.length / 50) * 15; // Estimate height based on text length
-            return baseHeight + textHeight + lineBreaks * 15;
-        },
-        overscan: 5,
-    });
-    
-    const virtualItems = rowVirtualizer.getVirtualItems();
-
     if (suggestions.length === 0) {
       return (
         <div className="p-4 text-xs text-muted-foreground h-full flex items-center justify-center text-center">
@@ -91,24 +60,17 @@ function ResultList({ suggestions, onSuggestionClick, highlight }: { suggestions
     }
     
     return (
-        <ScrollArea ref={parentRef} className="h-full w-full relative border rounded-md bg-background">
-          <div
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
-            }}
-          >
-            {virtualItems.map((virtualItem) => (
-                <ResultRow 
-                    key={virtualItem.key}
-                    virtualItem={virtualItem}
-                    suggestions={suggestions}
-                    onSuggestionClick={onSuggestionClick}
-                    highlight={highlight}
-                />
-            ))}
-          </div>
+        <ScrollArea className="h-full w-full relative border rounded-md bg-background">
+            <div className="p-2">
+                {suggestions.map((suggestion, index) => (
+                    <ResultRow 
+                        key={index}
+                        suggestion={suggestion}
+                        onSuggestionClick={onSuggestionClick}
+                        highlight={highlight}
+                    />
+                ))}
+            </div>
         </ScrollArea>
     );
 }
