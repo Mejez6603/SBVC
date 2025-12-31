@@ -8,8 +8,6 @@
  */
 import '@vercel/node-bridge';
 import { z } from 'genkit';
-import path from 'path';
-import fs from 'fs/promises';
 import { oldTestamentBooks, newTestamentBooks } from '@/lib/bible';
 
 const PassageSchema = z.object({
@@ -34,10 +32,12 @@ const bibleVersions = ['kjv', 'adb', 'tcb'];
 
 const bibleDataCache: { [version: string]: { [book: string]: any } } = {};
 
-// When running on Vercel, the `public` directory is not in the same place.
-// We need to use `path.join` with `process.cwd()` to build a reliable path.
-const dataRoot = path.join(process.cwd(), 'public');
-
+const getBaseUrl = () => {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'http://localhost:9002'; // Default for local development
+};
 
 async function loadBook(version: string, bookName: string) {
   if (!bookName) return null;
@@ -46,12 +46,17 @@ async function loadBook(version: string, bookName: string) {
     return bibleDataCache[version][bookFileName];
   }
 
-  const bibleDir = path.join(dataRoot, 'bible', version);
-  const filePath = path.join(bibleDir, bookFileName);
-
+  const baseUrl = getBaseUrl();
+  const filePath = `${baseUrl}/bible/${version}/${bookFileName}`;
+  
   try {
-    const fileContent = await fs.readFile(filePath, 'utf-8');
-    const bookData = JSON.parse(fileContent);
+    const response = await fetch(filePath);
+    if (!response.ok) {
+        // console.error(`Failed to fetch ${filePath}: ${response.statusText}`);
+        return null;
+    }
+
+    const bookData = await response.json();
 
     if (!bibleDataCache[version]) {
       bibleDataCache[version] = {};
@@ -60,7 +65,7 @@ async function loadBook(version: string, bookName: string) {
 
     return bookData;
   } catch (e) {
-    // console.error(`Could not read or parse ${filePath} for version ${version}:`, e);
+    // console.error(`Could not fetch or parse ${filePath} for version ${version}:`, e);
     return null;
   }
 }
