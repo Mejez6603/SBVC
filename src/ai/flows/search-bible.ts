@@ -42,7 +42,8 @@ async function loadBook(version: string, bookName: string) {
   }
   
   try {
-    const filePath = path.join(process.cwd(), 'public', 'bible', version, bookFileName);
+    // Correctly resolve path to bundled data files in `src/lib/bible`
+    const filePath = path.join(process.cwd(), 'src', 'lib', 'bible', version, bookFileName);
     const fileContent = await fs.readFile(filePath, 'utf-8');
     const bookData = JSON.parse(fileContent);
 
