@@ -209,9 +209,9 @@ export function Notepad() {
           ) : totalResultsCount > 0 ? (
             <Tabs defaultValue="kjv" className="flex-1 flex flex-col min-h-0">
                 <TabsList className="grid w-full grid-cols-3 mb-2">
-                    <TabsTrigger value="kjv">KJV ({results.kjv.length})</TabsTrigger>
-                    <TabsTrigger value="adb">ADB1905 ({results.adb.length})</TabsTrigger>
-                    <TabsTrigger value="tcb">TCB2015 ({results.tcb.length})</TabsTrigger>
+                    <TabsTrigger value="kjv">KJV</TabsTrigger>
+                    <TabsTrigger value="adb">ADB1905</TabsTrigger>
+                    <TabsTrigger value="tcb">TCB2015</TabsTrigger>
                 </TabsList>
                 <TabsContent value="kjv" className="flex-1 min-h-0 data-[state=inactive]:hidden">{renderResults(results.kjv)}</TabsContent>
                 <TabsContent value="adb" className="flex-1 min-h-0 data-[state=inactive]:hidden">{renderResults(results.adb)}</TabsContent>
