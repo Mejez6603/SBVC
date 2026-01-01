@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, RefreshCw } from 'lucide-react';
 import { Separator } from './ui/separator';
 
-const CUSTOMIZATION_KEY = 'sbvc-customization';
+const HYMNALS_CUSTOMIZATION_KEY = 'sbvc-hymnals-customization';
 
 type Customization = {
   fontFamily: string;
@@ -45,13 +45,13 @@ const defaultCustomization: Customization = {
 
 const presetColors = ['#D4A373', '#F5EBDD', '#FFFFFF', '#808080', '#000000'];
 
-export function CustomizationController() {
+export function HymnalsCustomizationController() {
   const [customization, setCustomization] = useState<Customization>(defaultCustomization);
   const titleColorInputRef = useRef<HTMLInputElement>(null);
   const textColorInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
+    const savedCustomization = localStorage.getItem(HYMNALS_CUSTOMIZATION_KEY);
     if (savedCustomization) {
       const parsed = JSON.parse(savedCustomization);
       // Backwards compatibility for old structures
@@ -84,16 +84,16 @@ export function CustomizationController() {
   const updateCustomization = (newCustomization: Partial<Customization>) => {
     const updated = { ...customization, ...newCustomization };
     setCustomization(updated);
-    localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(updated));
+    localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(updated));
   };
   
   const resetCustomization = () => {
       setCustomization(defaultCustomization);
-      localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(defaultCustomization));
+      localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(defaultCustomization));
   }
 
   const handleResetPosition = () => {
-    const saved = localStorage.getItem(CUSTOMIZATION_KEY);
+    const saved = localStorage.getItem(HYMNALS_CUSTOMIZATION_KEY);
     if (saved) {
         const currentCustomization = JSON.parse(saved);
         const newCustomization = {
@@ -101,7 +101,7 @@ export function CustomizationController() {
             positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } }
         };
         setCustomization(newCustomization);
-        localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
+        localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
     } else {
         updateCustomization({ positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } } });
     }

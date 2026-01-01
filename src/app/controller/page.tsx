@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { NavigationMenu } from '@/components/navigation-menu';
 
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
+const CONTENT_TYPE_KEY = 'sbvc-content-type';
 
 function Controller() {
   const { selectedTagalogVersion, setSelectedTagalogVersion, selectedEnglishVersion, setSelectedEnglishVersion } = useBible();
@@ -25,6 +26,8 @@ function Controller() {
   };
 
   useEffect(() => {
+    localStorage.setItem(CONTENT_TYPE_KEY, 'bible');
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'f' && !e.metaKey && !e.ctrlKey) {
         const target = e.target as HTMLElement;

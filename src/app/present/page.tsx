@@ -6,13 +6,17 @@ import type { Passage } from '@/context/app-context';
 import { AnimatePresence, motion, PanInfo } from 'framer-motion';
 
 const THEME_KEY = 'sbvc-theme';
-const PASSAGE_KEY = 'present-passage';
+const PASSAGE_KEY = 'sbvc-passage';
 const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 const CUSTOMIZATION_KEY = 'sbvc-customization';
+const HYMNALS_CUSTOMIZATION_KEY = 'sbvc-hymnals-customization';
+const BACKGROUND_COLOR_KEY = 'sbvc-background-color';
+const CONTENT_TYPE_KEY = 'sbvc-content-type';
 
 type Customization = {
   fontFamily: string;
   fontSize: number;
+  lineHeight: number;
   titleFontFamily: string;
   titleFontSize: number;
   textAlign: 'left' | 'center' | 'right' | 'justify';
@@ -21,14 +25,18 @@ type Customization = {
     title: { x: number; y: number };
     text: { x: number; y: number };
   };
+  titleColor: string;
+  textColor: string;
 };
 
 export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [backgroundColor, setBackgroundColor] = useState<string>('#000000');
   const [customization, setCustomization] = useState<Customization>({
     fontFamily: 'Inter',
     fontSize: 5,
+    lineHeight: 1.5,
     titleFontFamily: 'Inter',
     titleFontSize: 4.5,
     textAlign: 'center',
@@ -37,6 +45,8 @@ export default function PresentPage() {
       title: { x: 0, y: 0 },
       text: { x: 0, y: 0 },
     },
+    titleColor: '#ffffff',
+    textColor: '#ffffff',
   });
 
   const [adjustedFontSize, setAdjustedFontSize] = useState(customization.fontSize);
@@ -73,7 +83,9 @@ export default function PresentPage() {
     };
     const newCustomization = { ...customization, positions: newPositions };
     setCustomization(newCustomization);
-    localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
+    const contentType = localStorage.getItem(CONTENT_TYPE_KEY) || 'bible';
+    const key = contentType === 'bible' ? CUSTOMIZATION_KEY : HYMNALS_CUSTOMIZATION_KEY;
+    localStorage.setItem(key, JSON.stringify(newCustomization));
 
     if (type === 'title') {
         setIsDraggingTitle(false);
@@ -95,8 +107,17 @@ export default function PresentPage() {
           setPassage(savedPassage ? JSON.parse(savedPassage) : null);
         }
 
-        if (key === null || key === CUSTOMIZATION_KEY) {
-            const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
+        if (key === null || key === BACKGROUND_COLOR_KEY) {
+          const savedBackgroundColor = localStorage.getItem(BACKGROUND_COLOR_KEY);
+          if (savedBackgroundColor) {
+            setBackgroundColor(savedBackgroundColor);
+          }
+        }
+
+        if (key === null || key === CUSTOMIZATION_KEY || key === HYMNALS_CUSTOMIZATION_KEY) {
+            const contentType = localStorage.getItem(CONTENT_TYPE_KEY) || 'bible';
+            const customizationKey = contentType === 'bible' ? CUSTOMIZATION_KEY : HYMNALS_CUSTOMIZATION_KEY;
+            const savedCustomization = localStorage.getItem(customizationKey);
             if (savedCustomization) {
                 const parsed = JSON.parse(savedCustomization);
                 // Backwards compatibility for old structures
@@ -112,6 +133,15 @@ export default function PresentPage() {
                 }
                 if (parsed.horizontalPadding === undefined) {
                     parsed.horizontalPadding = 1;
+                }
+                if (parsed.lineHeight === undefined) {
+                  parsed.lineHeight = 1.5;
+                }
+                if (!parsed.titleColor) {
+                  parsed.titleColor = '#ffffff';
+                }
+                if (!parsed.textColor) {
+                  parsed.textColor = '#ffffff';
                 }
                 setCustomization(c => ({...c, ...parsed}));
             }
@@ -198,17 +228,21 @@ export default function PresentPage() {
   const passageStyle = {
     fontFamily: customization.fontFamily,
     textAlign: customization.textAlign,
+    color: customization.textColor,
+    lineHeight: customization.lineHeight,
   }
   
   const titleStyle = {
     fontFamily: customization.titleFontFamily,
     fontSize: `${customization.titleFontSize}rem`,
     textAlign: customization.textAlign,
+    color: customization.titleColor,
   }
 
   const mainStyle = {
     paddingLeft: `${customization.horizontalPadding}rem`,
     paddingRight: `${customization.horizontalPadding}rem`,
+    backgroundColor: backgroundColor,
   }
   
   const contentWrapperStyle = {
@@ -216,11 +250,11 @@ export default function PresentPage() {
   }
 
   return (
-    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center bg-background py-4 transition-colors duration-300 overflow-hidden" style={mainStyle}>
+    <main ref={containerRef} className="flex h-screen w-screen items-center justify-center py-4 transition-colors duration-300 overflow-hidden" style={mainStyle}>
       <AnimatePresence mode="wait">
         {passage ? (
           <motion.div
-            key={passage.reference}
+            key={`${passage.reference}-${passage.text}`}
             ref={contentWrapperRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -229,41 +263,45 @@ export default function PresentPage() {
             className="w-full h-full flex flex-col items-center justify-center"
             style={contentWrapperStyle}
           >
-            <motion.h1 
-                drag
-                dragMomentum={false}
-                onDragStart={() => setIsDraggingTitle(true)}
-                onDragEnd={(e, i) => handleDragEnd(i, 'title')}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{
-                    opacity: 1,
-                    x: isDraggingTitle ? undefined : customization.positions.title.x,
-                    y: isDraggingTitle ? undefined : customization.positions.title.y
-                }}
-                exit={{ opacity: 0, y: -20 }}
-                className="font-bold text-primary/90 mb-2 cursor-grab active:cursor-grabbing"
-                style={titleStyle}
-            >
-              {passage.reference}
-            </motion.h1>
-            <motion.p
-                ref={textRef}
-                drag
-                dragMomentum={false}
-                onDragStart={() => setIsDraggingText(true)}
-                onDragEnd={(e, i) => handleDragEnd(i, 'text')}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{
-                    opacity: 1,
-                    x: isDraggingText ? undefined : customization.positions.text.x,
-                    y: isDraggingText ? undefined : customization.positions.text.y
-                }}
-                exit={{ opacity: 0, y: -20 }}
-                className="leading-relaxed text-foreground max-w-full whitespace-pre-wrap cursor-grab active:cursor-grabbing"
-                style={passageStyle}
-            >
-              {passage.text}
-            </motion.p>
+            {passage.reference && (
+              <motion.h1 
+                  drag
+                  dragMomentum={false}
+                  onDragStart={() => setIsDraggingTitle(true)}
+                  onDragEnd={(e, i) => handleDragEnd(i, 'title')}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{
+                      opacity: 1,
+                      x: isDraggingTitle ? undefined : customization.positions.title.x,
+                      y: isDraggingTitle ? undefined : customization.positions.title.y
+                  }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="font-bold mb-2 cursor-grab active:cursor-grabbing"
+                  style={titleStyle}
+              >
+                {passage.reference}
+              </motion.h1>
+            )}
+            {passage.text && (
+              <motion.p
+                  ref={textRef}
+                  drag
+                  dragMomentum={false}
+                  onDragStart={() => setIsDraggingText(true)}
+                  onDragEnd={(e, i) => handleDragEnd(i, 'text')}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{
+                      opacity: 1,
+                      x: isDraggingText ? undefined : customization.positions.text.x,
+                      y: isDraggingText ? undefined : customization.positions.text.y
+                  }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="whitespace-pre-wrap cursor-grab active:cursor-grabbing"
+                  style={passageStyle}
+              >
+                {passage.text}
+              </motion.p>
+            )}
           </motion.div>
         ) : (
           <motion.div

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { Passage } from '@/context/app-context';
+import type { Passage, Hymn } from '@/context/app-context';
 import { motion, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAppContext } from '@/context/app-context';
@@ -20,14 +20,12 @@ type Customization = {
     title: { x: number; y: number };
     text: { x: number; y: number };
   };
+  titleColor: string;
+  textColor: string;
 };
 
-interface DraggablePreviewProps {
-  passage: Passage;
-}
-
-export function DraggablePreview({ passage }: DraggablePreviewProps) {
-  const { theme } = useAppContext();
+export function DraggablePreview() {
+  const { passage, hymn, backgroundColor } = useAppContext();
   const [customization, setCustomization] = useState<Customization>({
     fontFamily: 'Inter',
     fontSize: 5,
@@ -39,6 +37,8 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
       title: { x: 0, y: 0 },
       text: { x: 0, y: 0 },
     },
+    titleColor: '#D4A373',
+    textColor: '#F5EBDD',
   });
 
   const [adjustedFontSize, setAdjustedFontSize] = useState(customization.fontSize);
@@ -49,6 +49,8 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
 
   const [isDraggingTitle, setIsDraggingTitle] = useState(false);
   const [isDraggingText, setIsDraggingText] = useState(false);
+
+  const displayContent = passage || (hymn ? { reference: hymn.title, text: hymn.lyrics.join('\n') } : null);
 
   useEffect(() => {
     const syncCustomization = () => {
@@ -64,6 +66,8 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
                 if (!parsed.titleFontSize) parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
                 if (!parsed.titleFontFamily) parsed.titleFontFamily = 'Inter';
                 if (parsed.horizontalPadding === undefined) parsed.horizontalPadding = 1;
+                if (!parsed.titleColor) parsed.titleColor = '#D4A373';
+                if (!parsed.textColor) parsed.textColor = '#F5EBDD';
                 setCustomization(c => ({...c, ...parsed}));
             }
         } catch (e) {
@@ -90,7 +94,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
 
   useEffect(() => {
     const adjustFontSize = () => {
-        if (passage && textRef.current && containerRef.current && contentWrapperRef.current) {
+        if (displayContent && textRef.current && containerRef.current && contentWrapperRef.current) {
             let currentFontSize = customization.fontSize;
             const contentWrapper = contentWrapperRef.current;
             const container = containerRef.current;
@@ -116,7 +120,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
         resizeObserver.observe(containerRef.current);
     }
     return () => resizeObserver.disconnect();
-  }, [passage, customization.fontSize, previewScale, containerRef, contentWrapperRef, textRef]);
+  }, [displayContent, customization.fontSize, previewScale, containerRef, contentWrapperRef, textRef]);
 
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo, type: 'title' | 'text') => {
@@ -143,18 +147,21 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
     fontFamily: customization.fontFamily,
     lineHeight: 1.5,
     textAlign: customization.textAlign,
+    color: customization.textColor,
   }
   
   const titleStyle = {
     fontFamily: customization.titleFontFamily,
     fontSize: `${customization.titleFontSize * previewScale}rem`,
     cursor: isDraggingTitle ? 'grabbing' : 'grab',
-    textAlign: customization.textAlign
+    textAlign: customization.textAlign,
+    color: customization.titleColor,
   }
 
   const containerStyle = {
     paddingLeft: `${customization.horizontalPadding * previewScale}rem`,
     paddingRight: `${customization.horizontalPadding * previewScale}rem`,
+    backgroundColor: backgroundColor
   }
 
   const contentWrapperStyle = {
@@ -167,10 +174,9 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
         style={containerStyle}
         className={cn(
             "aspect-video w-full rounded-md relative overflow-hidden flex flex-col items-center justify-center transition-colors duration-300",
-            theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'
         )}
     >
-        {passage ? (
+        {displayContent ? (
             <div ref={contentWrapperRef} className="w-full h-full flex flex-col items-center justify-center" style={contentWrapperStyle}>
                  <motion.h1
                     drag
@@ -184,7 +190,7 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
                     className="font-bold mb-1 cursor-grab active:cursor-grabbing line-clamp-1"
                     style={titleStyle}
                 >
-                    {passage.reference}
+                    {displayContent.reference}
                 </motion.h1>
                 <motion.p
                     ref={textRef}
@@ -199,16 +205,14 @@ export function DraggablePreview({ passage }: DraggablePreviewProps) {
                     className="whitespace-pre-wrap cursor-grab active:cursor-grabbing"
                     style={{ ...passageStyle, cursor: isDraggingText ? 'grabbing' : 'grab' }}
                 >
-                    {passage.text}
+                    {displayContent.text}
                 </motion.p>
             </div>
         ) : (
              <div className="text-center">
-                <p className={cn("text-sm", theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500')}>No passage selected</p>
+                <p className={"text-sm text-neutral-400'"}>No content selected</p>
             </div>
         )}
     </div>
   );
 }
-
-    
