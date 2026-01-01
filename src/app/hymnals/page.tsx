@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { X, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import { X, AlignLeft, AlignCenter, AlignRight, AlignJustify, Play, Moon, RefreshCw, Maximize } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import hymns from '@/data/hymns.json';
 import { Label } from '@/components/ui/label';
@@ -156,6 +156,7 @@ export default function HymnalsPage() {
               <TabsTrigger value="video">Video</TabsTrigger>
             </TabsList>
             <TabsContent value="hymnal" className="flex-1 flex flex-col min-h-0 pt-4">
+                <ScrollArea className='flex-1'>
                  <div className="flex-shrink-0">
                     <h2 className="text-xl font-bold mb-2">Background</h2>
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -242,6 +243,7 @@ export default function HymnalsPage() {
                     </div>
                 )}
                 {!activeHymn && <div className="flex-1 flex items-center justify-center"><p className="text-muted-foreground">Select a hymn from the preset to see its lyrics.</p></div>}
+                </ScrollArea>
             </TabsContent>
             <TabsContent value="video">
                 <div className="flex-1 flex items-center justify-center"><p className="text-muted-foreground">Video content goes here.</p></div>
@@ -275,6 +277,14 @@ export default function HymnalsPage() {
                 <div className="text-muted-foreground">No lyrics selected</div>
             )}
           </div>
+
+            <div className="flex items-center justify-center gap-2 mt-4">
+                <Button variant="outline" size="icon"><Play className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon"><X className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon"><Moon className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon"><Maximize className="h-4 w-4" /></Button>
+            </div>
 
           <div className="border-t my-4"></div>
 
@@ -315,7 +325,7 @@ export default function HymnalsPage() {
                             <ToggleGroup
                                 type="single"
                                 value={textAlign}
-                                onValueChange={(value) => value && setTextAlign(value as any)}
+                                onValueChange={(value: 'left' | 'center' | 'right' | 'justify') => value && setTextAlign(value)}
                                 className="grid grid-cols-4 gap-1 mt-1"
                             >
                                 <ToggleGroupItem value="left" aria-label="Left align"><AlignLeft className="h-4 w-4" /></ToggleGroupItem>
