@@ -24,6 +24,14 @@ type Customization = {
   textColor: string;
 };
 
+// Helper function to handle font family names
+const getFontFamily = (font: string) => {
+  if (font.includes(' ')) {
+    return `'${font}'`;
+  }
+  return font;
+};
+
 export function DraggablePreview() {
   const { passage, hymn, backgroundColor } = useAppContext();
   const [customization, setCustomization] = useState<Customization>({
@@ -144,14 +152,14 @@ export function DraggablePreview() {
   };
   
   const passageStyle = {
-    fontFamily: customization.fontFamily,
+    fontFamily: getFontFamily(customization.fontFamily),
     lineHeight: 1.5,
     textAlign: customization.textAlign,
     color: customization.textColor,
   }
   
   const titleStyle = {
-    fontFamily: customization.titleFontFamily,
+    fontFamily: getFontFamily(customization.titleFontFamily),
     fontSize: `${customization.titleFontSize * previewScale}rem`,
     cursor: isDraggingTitle ? 'grabbing' : 'grab',
     textAlign: customization.textAlign,

@@ -29,6 +29,14 @@ type Customization = {
   textColor: string;
 };
 
+// Helper function to handle font family names
+const getFontFamily = (font: string) => {
+  if (font.includes(' ')) {
+    return `'${font}'`;
+  }
+  return font;
+};
+
 export default function PresentPage() {
   const [passage, setPassage] = useState<Passage | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -226,14 +234,14 @@ export default function PresentPage() {
 
 
   const passageStyle = {
-    fontFamily: customization.fontFamily,
+    fontFamily: getFontFamily(customization.fontFamily),
     textAlign: customization.textAlign,
     color: customization.textColor,
     lineHeight: customization.lineHeight,
   }
   
   const titleStyle = {
-    fontFamily: customization.titleFontFamily,
+    fontFamily: getFontFamily(customization.titleFontFamily),
     fontSize: `${customization.titleFontSize}rem`,
     textAlign: customization.textAlign,
     color: customization.titleColor,
