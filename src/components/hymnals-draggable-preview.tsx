@@ -1,30 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { Passage, Hymn, MediaFile } from '@/context/app-context';
+import type { Passage, Hymn, MediaFile, Customization } from '@/context/app-context';
 import { motion, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAppContext } from '@/context/app-context';
 import { VideoPlayer } from '@/components/video-player';
-
-const CUSTOMIZATION_KEY = 'sbvc-hymnals-customization';
-
-type Customization = {
-  fontFamily: string;
-  fontSize: number;
-  lineHeight: number;
-  titleFontFamily: string;
-  titleFontSize: number;
-  textAlign: 'left' | 'center' | 'right' | 'justify';
-  horizontalPadding: number;
-  positions: {
-    title: { x: number; y: number };
-    text: { x: number; y: number };
-  };
-  titleColor: string;
-  textColor: string;
-};
-
 
 // Helper function to handle font family names
 const getFontFamily = (font: string) => {
@@ -34,23 +15,15 @@ const getFontFamily = (font: string) => {
   return font;
 };
 
-export function DraggablePreview() {
-  const { passage, hymn, backgroundColor, activeMedia } = useAppContext();
-  const [customization, setCustomization] = useState<Customization>({
-    fontFamily: 'Inter',
-    fontSize: 5,
-    lineHeight: 1.5,
-    titleFontFamily: 'Inter',
-    titleFontSize: 4.5,
-    textAlign: 'center',
-    horizontalPadding: 1,
-    positions: {
-      title: { x: 0, y: 0 },
-      text: { x: 0, y: 0 },
-    },
-    titleColor: '#D4A373',
-    textColor: '#F5EBDD',
-  });
+export function HymnalsDraggablePreview() {
+  const { 
+      passage, 
+      hymn, 
+      backgroundColor, 
+      activeMedia, 
+      hymnalsCustomization: customization, 
+      setHymnalsCustomization 
+  } = useAppContext();
 
   const [previewScale, setPreviewScale] = useState(1);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -62,40 +35,6 @@ export function DraggablePreview() {
 
   const displayContent = passage || (hymn ? { reference: hymn.title, text: hymn.lyrics.join('\n') } : null);
 
-  useEffect(() => {
-    const syncCustomization = () => {
-        try {
-            const savedCustomization = localStorage.getItem(CUSTOMIZATION_KEY);
-            if (savedCustomization) {
-                const parsed = JSON.parse(savedCustomization);
-                // Backwards compatibility
-                if (parsed.position) {
-                    parsed.positions = { title: parsed.position, text: parsed.position };
-                    delete parsed.position;
-                }
-                if (!parsed.titleFontSize) parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
-                if (!parsed.titleFontFamily) parsed.titleFontFamily = 'Inter';
-                if (parsed.horizontalPadding === undefined) parsed.horizontalPadding = 1;
-                if (!parsed.lineHeight) parsed.lineHeight = 1.5;
-                if (!parsed.titleColor) parsed.titleColor = '#D4A373';
-                if (!parsed.textColor) parsed.textColor = '#F5EBDD';
-                setCustomization(c => ({...c, ...parsed}));
-            }
-        } catch (e) {
-            console.error("Failed to parse from local storage", e)
-        }
-    }
-    syncCustomization();
-
-    const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === CUSTOMIZATION_KEY) {
-            syncCustomization();
-        }
-    }
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-  
   useEffect(() => {
     const calculateScale = () => {
         if (containerRef.current) {
@@ -114,14 +53,13 @@ export function DraggablePreview() {
     
     if(type in newPositions) {
         newPositions[type] = {
-        x: customization.positions[type].x + info.offset.x * scaleFactor,
-        y: customization.positions[type].y + info.offset.y * scaleFactor,
+            x: customization.positions[type].x + info.offset.x * scaleFactor,
+            y: customization.positions[type].y + info.offset.y * scaleFactor,
         };
     }
     
     const newCustomization = { ...customization, positions: newPositions };
-    setCustomization(newCustomization);
-    localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
+    setHymnalsCustomization(newCustomization);
 
     if (type === 'title') {
         setIsDraggingTitle(false);
