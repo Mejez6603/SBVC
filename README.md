@@ -1,10 +1,10 @@
-# SBVC - Simple Bible Verse Controller
+# SBVC - Show Bible Verse Controller
 
 ## Description
 
 SBVC is a modern, web-based application designed to facilitate the presentation of Bible passages for church services, Bible studies, and other gatherings. Built with Next.js and TypeScript, it offers a clean, distraction-free viewing experience for the audience and a powerful, intuitive control panel for the operator.
 
-![](images/sbvc001.png) 
+![](/images/sbvc001.png) 
 
 The system uses a dual-window approach:
 1.  **Controller Window**: A comprehensive dashboard for selecting books, chapters, and verses, searching for topics, customizing the look and feel, and previewing the output.
@@ -146,4 +146,4 @@ The application is configured for easy deployment on modern hosting platforms th
 
 ## License
 
-This project is open-source and available for personal and community use. Please refer to the `LICENSE` file for more details. (A standard MIT License is recommended if one is not present).
+This project is open-source and available for personal and community use. Please refer to the `LICENSE` file for more details.
