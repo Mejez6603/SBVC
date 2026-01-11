@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useBible } from '@/context/bible-context';
@@ -8,6 +7,15 @@ import { cn } from '@/lib/utils';
 
 export function ChapterList() {
   const { selectedBook, selectedChapter, setSelectedChapter } = useBible();
+  
+  if (!selectedBook) {
+    return (
+        <div className="w-[60px] border-r flex flex-col items-center justify-center">
+            <p className="text-xs text-muted-foreground p-2 text-center">Select a book</p>
+        </div>
+    );
+  }
+
   const numChapters = bookChapters[selectedBook] || 0;
 
   return (

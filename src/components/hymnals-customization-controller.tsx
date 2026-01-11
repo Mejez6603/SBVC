@@ -1,31 +1,13 @@
-
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useAppContext, Customization } from '@/context/app-context';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Slider } from './ui/slider';
 import { Button } from './ui/button';
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, RefreshCw } from 'lucide-react';
 import { Separator } from './ui/separator';
-
-const HYMNALS_CUSTOMIZATION_KEY = 'sbvc-hymnals-customization';
-
-type Customization = {
-  fontFamily: string;
-  fontSize: number;
-  lineHeight: number;
-  titleFontFamily: string;
-  titleFontSize: number;
-  textAlign: 'left' | 'center' | 'right' | 'justify';
-  horizontalPadding: number;
-  positions: {
-    title: { x: number; y: number };
-    text: { x: number; y: number };
-  };
-  titleColor: string;
-  textColor: string;
-};
 
 const defaultCustomization: Customization = {
     fontFamily: 'Inter',
@@ -46,65 +28,20 @@ const defaultCustomization: Customization = {
 const presetColors = ['#D4A373', '#F5EBDD', '#FFFFFF', '#808080', '#000000'];
 
 export function HymnalsCustomizationController() {
-  const [customization, setCustomization] = useState<Customization>(defaultCustomization);
+  const { hymnalsCustomization: customization, setHymnalsCustomization } = useAppContext();
   const titleColorInputRef = useRef<HTMLInputElement>(null);
   const textColorInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const savedCustomization = localStorage.getItem(HYMNALS_CUSTOMIZATION_KEY);
-    if (savedCustomization) {
-      const parsed = JSON.parse(savedCustomization);
-      // Backwards compatibility for old structures
-      if (parsed.position) {
-          parsed.positions = { title: parsed.position, text: parsed.position };
-          delete parsed.position;
-      }
-      if (!parsed.titleFontSize) {
-          parsed.titleFontSize = parsed.fontSize ? parsed.fontSize * 0.9 : 4.5;
-      }
-      if (!parsed.titleFontFamily) {
-        parsed.titleFontFamily = 'Inter';
-      }
-      if (parsed.horizontalPadding === undefined) {
-        parsed.horizontalPadding = 1;
-      }
-      if (parsed.lineHeight === undefined) {
-        parsed.lineHeight = defaultCustomization.lineHeight;
-      }
-      if (!parsed.titleColor) {
-        parsed.titleColor = defaultCustomization.titleColor;
-      }
-      if (!parsed.textColor) {
-        parsed.textColor = defaultCustomization.textColor;
-      }
-      setCustomization(p => ({...p, ...parsed}));
-    }
-  }, []);
-
   const updateCustomization = (newCustomization: Partial<Customization>) => {
-    const updated = { ...customization, ...newCustomization };
-    setCustomization(updated);
-    localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(updated));
+    setHymnalsCustomization({ ...customization, ...newCustomization });
   };
   
   const resetCustomization = () => {
-      setCustomization(defaultCustomization);
-      localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(defaultCustomization));
+      setHymnalsCustomization(defaultCustomization);
   }
 
   const handleResetPosition = () => {
-    const saved = localStorage.getItem(HYMNALS_CUSTOMIZATION_KEY);
-    if (saved) {
-        const currentCustomization = JSON.parse(saved);
-        const newCustomization = {
-            ...currentCustomization,
-            positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } }
-        };
-        setCustomization(newCustomization);
-        localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(newCustomization));
-    } else {
-        updateCustomization({ positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } } });
-    }
+    updateCustomization({ positions: { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } } });
   };
 
   return (

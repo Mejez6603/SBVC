@@ -10,8 +10,8 @@ import { X, Play, RefreshCw, Maximize, Upload, Video, Music } from 'lucide-react
 import { cn } from '@/lib/utils';
 import englishHymns from '@/data/hymns-english.json';
 import tagalogHymns from '@/data/hymns-tagalog.json';
-import { DraggablePreview } from '@/components/draggable-preview';
-import { useAppContext, Hymn, Passage } from '@/context/app-context';
+import { HymnalsDraggablePreview } from '@/components/hymnals-draggable-preview';
+import { useAppContext, Hymn, Passage, MediaFile } from '@/context/app-context';
 import { HymnalsCustomizationController } from '@/components/hymnals-customization-controller';
 import { useToast } from '@/components/use-toast';
 
@@ -28,10 +28,8 @@ const FULLSCREEN_KEY = 'sbvc-fullscreen-request';
 const CONTENT_TYPE_KEY = 'sbvc-content-type';
 const MAX_PRESET_ITEMS = 15;
 
-interface MediaFile {
-  name: string;
-  url: string;
-  type: 'video' | 'audio';
+// Redefine MediaFile to match the one in app-context, but with thumbnail
+interface ControllableMediaFile extends MediaFile {
   thumbnail: string | null;
 }
 
@@ -68,51 +66,44 @@ const generateThumbnail = (file: File): Promise<string | null> => {
 
 export default function HymnalsPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const { 
-    passage, setPassage, 
-    backgroundColor, setBackgroundColor, 
-    preset, setPreset
-  } = useAppContext(); 
-  const [activeHymn, setActiveHymn] = useState<Hymn | null>(null);
+  const {
+    passage, setPassage,
+    hymn, setHymn,
+    backgroundColor, setBackgroundColor,
+    preset, setPreset,
+    mediaFiles, setMediaFiles,
+    activeMedia, setActiveMedia
+  } = useAppContext();
+
   const [selectedVerseIndex, setSelectedVerseIndex] = useState<number | null>(null);
   const { toast } = useToast();
-  const [files, setFiles] = useState<MediaFile[]>([]);
-  const [activeFile, setActiveFile] = useState<MediaFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // This local state will hold media files with their thumbnails for the controller UI
+  const [localMediaFiles, setLocalMediaFiles] = useState<ControllableMediaFile[]>([]);
 
   useEffect(() => {
     localStorage.setItem(CONTENT_TYPE_KEY, 'hymnal');
   }, []);
 
   const handleShowScreen = () => {
-    try {
-        if(passage) {
-            localStorage.setItem('present-passage', JSON.stringify(passage));
-        } else {
-            localStorage.removeItem('present-passage');
-        }
-      window.open('/present', 'present');
-    } catch (error) {
-      console.error("Could not open presentation window:", error);
-    }
+    window.open('/present', 'present');
   };
-  
+
   const handleClearScreen = () => {
     setPassage(null);
-    try {
-      localStorage.removeItem('present-passage');
-    } catch (error) {
-      console.error("Could not clear passage from local storage:", error);
-    }
+    setActiveMedia(null);
   }
 
   const handleResetPosition = () => {
     const saved = localStorage.getItem(HYMNALS_CUSTOMIZATION_KEY);
     if (saved) {
-        const currentCustomization = JSON.parse(saved);
-        currentCustomization.positions = { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } };
-        localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(currentCustomization));
+        try {
+            const currentCustomization = JSON.parse(saved);
+            currentCustomization.positions = { title: { x: 0, y: 0 }, text: { x: 0, y: 0 } };
+            localStorage.setItem(HYMNALS_CUSTOMIZATION_KEY, JSON.stringify(currentCustomization));
+        } catch {}
     }
   };
 
@@ -120,14 +111,14 @@ export default function HymnalsPage() {
     localStorage.setItem(FULLSCREEN_KEY, Date.now().toString());
   };
 
-  const filteredEnglishHymns = useMemo(() => 
-    englishHymns.filter((hymn) =>
-      hymn.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEnglishHymns = useMemo(() =>
+    englishHymns.filter((h) =>
+      h.title.toLowerCase().includes(searchTerm.toLowerCase())
     ), [searchTerm]);
 
-  const filteredTagalogHymns = useMemo(() => 
-    tagalogHymns.filter((hymn) =>
-      hymn.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTagalogHymns = useMemo(() =>
+    tagalogHymns.filter((h) =>
+      h.title.toLowerCase().includes(searchTerm.toLowerCase())
     ), [searchTerm]);
 
   const handleAddToPreset = (hymnToAdd: Hymn) => {
@@ -146,32 +137,28 @@ export default function HymnalsPage() {
 
   const handleRemoveFromPreset = (hymnToRemove: Hymn) => {
     setPreset(preset.filter(h => !(h.number === hymnToRemove.number && h.title === hymnToRemove.title)));
-    if (activeHymn?.number === hymnToRemove.number && activeHymn?.title === hymnToRemove.title) {
-        setActiveHymn(null);
+    if (hymn?.number === hymnToRemove.number && hymn?.title === hymnToRemove.title) {
+        setHymn(null);
         setPassage(null);
     }
   };
 
-  const handleHymnSelectFromPreset = (hymn: Hymn) => {
-    setActiveHymn(hymn);
-    setSelectedVerseIndex(null);
+  const handleHymnSelectFromPreset = (selectedHymn: Hymn) => {
+    setHymn(selectedHymn);
+    setActiveMedia(null); // Clear active media when a hymn is selected
+    setPassage(null); // Set initial passage to title
+    setSelectedVerseIndex(null); // Select title by default
   };
-  
-  const handleContentSelectForPreview = (content: string[], reference: string, index: number) => {
-    let newPassage: Passage;
-    if (index === -1) {
-        newPassage = {
-            reference: reference,
-            text: ''
-        };
-    } else {
-        newPassage = {
-            reference: '',
-            text: content.join('\n')
-        };
-    }
-    setPassage(newPassage)
+
+  const handleContentSelectForPreview = (content: string[], index: number) => {
+    if (!hymn) return;
+    const newPassage: Passage = {
+      reference: index === -1 ? hymn.title : '', // Only show title when index is -1
+      text: index === -1 ? '' : content.join('\n')
+    };
+    setPassage(newPassage);
     setSelectedVerseIndex(index);
+    setActiveMedia(null); // Ensure media is not playing when lyrics are selected
   };
 
   const getGroupedLyrics = (lyrics: string[]): string[][] => {
@@ -191,32 +178,37 @@ export default function HymnalsPage() {
     return groups;
   };
 
-  const groupedLyrics = useMemo(() => 
-    activeHymn ? getGroupedLyrics(activeHymn.lyrics) : [], 
-  [activeHymn]);
+  const groupedLyrics = useMemo(() =>
+    hymn ? getGroupedLyrics(hymn.lyrics) : [],
+  [hymn]);
+
+  const addFiles = async (newFiles: File[]) => {
+    const filePromises = newFiles
+      .filter(file => file.type.startsWith('video/') || file.type.startsWith('audio/'))
+      .map(async (file) => {
+        const thumbnail = await generateThumbnail(file);
+        const url = URL.createObjectURL(file);
+        return {
+          name: file.name,
+          url: url,
+          type: file.type,
+          thumbnail: thumbnail,
+        };
+      });
+
+    const newLocalFiles = await Promise.all(filePromises);
+    setLocalMediaFiles(prev => [...prev, ...newLocalFiles]);
+
+    // Update global state, stripping thumbnail
+    const newGlobalFiles = newLocalFiles.map(({thumbnail, ...rest}) => rest);
+    setMediaFiles([...mediaFiles, ...newGlobalFiles]);
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
     if (selectedFiles) {
       addFiles(Array.from(selectedFiles));
     }
-  };
-
-  const addFiles = async (newFiles: File[]) => {
-    const mediaFilePromises = newFiles
-      .filter(file => file.type.startsWith('video/') || file.type.startsWith('audio/'))
-      .map(async (file) => {
-        const thumbnail = await generateThumbnail(file);
-        return {
-          name: file.name,
-          url: URL.createObjectURL(file),
-          type: file.type.startsWith('video/') ? 'video' : 'audio' as 'video' | 'audio',
-          thumbnail,
-        };
-      });
-
-    const mediaFiles = await Promise.all(mediaFilePromises);
-    setFiles(prev => [...prev, ...mediaFiles]);
   };
 
   const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -227,7 +219,7 @@ export default function HymnalsPage() {
     if (droppedFiles) {
       addFiles(Array.from(droppedFiles));
     }
-  }, []);
+  }, [addFiles]);
 
   const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -246,14 +238,20 @@ export default function HymnalsPage() {
     setIsDragging(false);
   }, []);
 
-  const handleSelectFile = (file: MediaFile) => {
-    setActiveFile(file);
+  const handleSelectFile = (file: ControllableMediaFile) => {
+    // Set the global active media, stripping thumbnail
+    const { thumbnail, ...globalFile } = file;
+    setActiveMedia(globalFile);
+    setHymn(null); // Clear hymn and passage when media is selected
+    setPassage(null);
   };
 
-  const handleRemoveFile = (fileToRemove: MediaFile) => {
-    setFiles(files.filter(f => f.url !== fileToRemove.url));
-    if (activeFile?.url === fileToRemove.url) {
-      setActiveFile(null);
+  const handleRemoveFile = (fileToRemove: ControllableMediaFile) => {
+    setLocalMediaFiles(localMediaFiles.filter(f => f.url !== fileToRemove.url));
+    setMediaFiles(mediaFiles.filter(f => f.url !== fileToRemove.url));
+
+    if (activeMedia?.url === fileToRemove.url) {
+      setActiveMedia(null);
     }
     URL.revokeObjectURL(fileToRemove.url);
     if (fileToRemove.thumbnail) {
@@ -282,18 +280,18 @@ export default function HymnalsPage() {
               <h2 className="text-lg font-semibold mb-2">English</h2>
               <ScrollArea className="flex-1">
                 <div className="flex flex-col space-y-1 pr-2">
-                  {filteredEnglishHymns.map((hymn, index) => (
+                  {filteredEnglishHymns.map((h, index) => (
                      <div
-                        key={`english-hymn-${hymn.number}-${index}`}
+                        key={`english-hymn-${h.number}-${index}`}
                         className="group flex items-center justify-between p-2 rounded-md hover:bg-muted"
                       >
                         <span className="flex-1 h-auto whitespace-normal text-left pr-2">
-                          {hymn.number}. {hymn.title}
+                          {h.number}. {h.title}
                         </span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleAddToPreset(hymn)}
+                          onClick={() => handleAddToPreset(h)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           Add
@@ -307,18 +305,18 @@ export default function HymnalsPage() {
               <h2 className="text-lg font-semibold mb-2">Tagalog</h2>
               <ScrollArea className="flex-1">
                 <div className="flex flex-col space-y-2 pr-2">
-                  {filteredTagalogHymns.map((hymn, index) => (
+                  {filteredTagalogHymns.map((h, index) => (
                      <div
-                        key={`tagalog-hymn-${hymn.number}-${index}`}
+                        key={`tagalog-hymn-${h.number}-${index}`}
                         className="group flex items-center justify-between p-2 rounded-md hover:bg-muted"
                       >
                         <span className="flex-1 h-auto whitespace-normal text-left pr-2">
-                          {hymn.number}. {hymn.title}
+                          {h.number}. {h.title}
                         </span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleAddToPreset(hymn)}
+                          onClick={() => handleAddToPreset(h)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           Add
@@ -357,21 +355,22 @@ export default function HymnalsPage() {
                                     </Button>
                                 ))}
                             </div>
-                            <div className="border-t my-4"></div>
+                            <div className="border-t my-4">
+                            </div>
                         </div>
                         <div className="flex-shrink-0">
                             <h2 className="text-xl font-bold mb-2">Preset</h2>
                             {preset.length > 0 ? (
                                 <div className="grid grid-cols-3 gap-2">
-                                    {preset.map((hymn, index) => (
-                                        <div key={`${hymn.number}-${index}`} className={cn(
+                                    {preset.map((h, index) => (
+                                        <div key={`${h.number}-${index}`} className={cn(
                                             "flex items-center justify-between p-2 border rounded-md cursor-pointer",
-                                            activeHymn?.number === hymn.number && activeHymn?.title === hymn.title && 'bg-muted font-semibold'
+                                            hymn?.number === h.number && hymn?.title === h.title && 'bg-muted font-semibold'
                                         )}
-                                        onClick={() => handleHymnSelectFromPreset(hymn)}
+                                        onClick={() => handleHymnSelectFromPreset(h)}
                                         >
-                                            <span className="truncate pr-2">{hymn.number}. {hymn.title}</span>
-                                            <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={(e) => { e.stopPropagation(); handleRemoveFromPreset(hymn); }}>
+                                            <span className="truncate pr-2">{h.number}. {h.title}</span>
+                                            <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={(e) => { e.stopPropagation(); handleRemoveFromPreset(h); }}>
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -383,13 +382,13 @@ export default function HymnalsPage() {
                             <div className="border-t my-4"></div>
                         </div>
 
-                        {activeHymn && (
+                        {hymn && (
                             <div className="flex flex-col flex-1 min-h-0">
-                                <h3 className="text-lg font-bold mb-2 flex-shrink-0">{activeHymn.title}</h3>
+                                <h3 className="text-lg font-bold mb-2 flex-shrink-0">{hymn.title}</h3>
                                 <ScrollArea className="flex-1 pr-2">
                                     <div className="flex flex-col gap-2 mt-2">
                                         <div
-                                            onClick={() => handleContentSelectForPreview([activeHymn.title], activeHymn.title, -1)}
+                                            onClick={() => handleContentSelectForPreview([hymn.title], -1)}
                                             className={cn(
                                             'p-3 rounded-md cursor-pointer border',
                                             selectedVerseIndex === -1
@@ -399,13 +398,13 @@ export default function HymnalsPage() {
                                         >
                                             <p className="font-bold mb-2 text-sm">Title</p>
                                             <p className="whitespace-pre-wrap text-sm">
-                                                {activeHymn.title}
+                                                {hymn.title}
                                             </p>
                                         </div>
                                         {groupedLyrics.map((verse, index) => (
                                         <div
                                             key={index}
-                                            onClick={() => handleContentSelectForPreview(verse, `${activeHymn.title} - Verse ${index + 1}`, index)}
+                                            onClick={() => handleContentSelectForPreview(verse, index)}
                                             className={cn(
                                             'p-3 rounded-md cursor-pointer border',
                                             selectedVerseIndex === index
@@ -425,7 +424,7 @@ export default function HymnalsPage() {
                                 </ScrollArea>
                             </div>
                         )}
-                        {!activeHymn && <div className="flex-1 flex items-center justify-center"><p className="text-muted-foreground">Select a hymn from the preset to see its lyrics.</p></div>}
+                        {!hymn && <div className="flex-1 flex items-center justify-center"><p className="text-muted-foreground">Select a hymn from the preset to see its lyrics.</p></div>}
                     </ScrollArea>
                 </TabsContent>
                 <TabsContent value="video" className="flex-1 flex flex-col min-h-0 pt-4">
@@ -454,17 +453,17 @@ export default function HymnalsPage() {
                     <div className="flex-grow mt-4 overflow-hidden">
                         <h3 className="text-lg font-semibold mb-2">Media Library</h3>
                         <ScrollArea className="h-full pr-4">
-                        {files.length === 0 ? (
+                        {localMediaFiles.length === 0 ? (
                             <p className="text-muted-foreground text-center py-4">No media files added.</p>
                         ) : (
                             <div className="space-y-2">
-                            {files.map(file => (
+                            {localMediaFiles.map(file => (
                                 <div
                                 key={file.url}
                                 onClick={() => handleSelectFile(file)}
                                 className={cn(
                                     'flex items-center justify-between p-2 border rounded-md cursor-pointer',
-                                    activeFile?.url === file.url ? 'bg-muted font-semibold' : 'hover:bg-muted/50'
+                                    activeMedia?.url === file.url ? 'bg-muted font-semibold' : 'hover:bg-muted/50'
                                 )}
                                 >
                                 <div className="flex items-center gap-3 truncate">
@@ -487,11 +486,11 @@ export default function HymnalsPage() {
                         </ScrollArea>
                     </div>
 
-                    {activeFile && (
+                    {activeMedia && (
                         <div className="flex-shrink-0 mt-4 border-t pt-4">
                         <h3 className="text-lg font-semibold mb-2">Now Playing</h3>
-                        <video controls autoPlay key={activeFile.url} className="w-full rounded-lg bg-black">
-                            <source src={activeFile.url} type={activeFile.type === 'video' ? 'video/mp4' : 'audio/mp3'} />
+                        <video controls autoPlay key={activeMedia.url} className="w-full rounded-lg bg-black">
+                            <source src={activeMedia.url} type={activeMedia.type === 'video' ? 'video/mp4' : 'audio/mp3'} />
                             Your browser does not support the video tag.
                         </video>
                         </div>
@@ -503,7 +502,7 @@ export default function HymnalsPage() {
         {/* Preview Panel (Right) */}
         <div className="w-[400px] flex-shrink-0 p-4 bg-card text-card-foreground border-l flex flex-col">
           <h2 className="text-lg font-semibold mb-4">Preview</h2>
-          <DraggablePreview />
+          <HymnalsDraggablePreview />
            <div className="grid grid-cols-4 gap-2 mt-4">
                 <Button variant="outline" size="icon" onClick={handleShowScreen}>
                     <Play />
